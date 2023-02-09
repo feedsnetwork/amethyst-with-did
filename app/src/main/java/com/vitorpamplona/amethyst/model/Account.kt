@@ -4,6 +4,7 @@ import android.content.res.Resources
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
 import androidx.core.os.ConfigurationCompat
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.vitorpamplona.amethyst.service.relays.Constants
 import com.vitorpamplona.amethyst.service.model.ChannelCreateEvent
@@ -225,6 +226,7 @@ class Account(
       mentions = mentionsHex,
       privateKey = loggedIn.privKey!!
     )
+    Log.d("TAG", "sendPost: "+signedEvent.toString());
     Client.send(signedEvent)
     LocalCache.consume(signedEvent)
   }
