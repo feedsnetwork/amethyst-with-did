@@ -5,6 +5,9 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
 import androidx.core.os.ConfigurationCompat
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import com.vitorpamplona.amethyst.service.relays.Constants
 import com.vitorpamplona.amethyst.service.model.ChannelCreateEvent
@@ -17,6 +20,7 @@ import com.vitorpamplona.amethyst.service.relays.Client
 import com.vitorpamplona.amethyst.service.relays.FeedType
 import com.vitorpamplona.amethyst.service.relays.Relay
 import com.vitorpamplona.amethyst.service.relays.RelayPool
+import com.vitorpamplona.amethyst.test.MyEvent
 import com.vitorpamplona.amethyst.ui.actions.NewRelayListViewModel
 import java.util.Date
 import java.util.Locale
@@ -35,9 +39,10 @@ import nostr.postr.events.MetadataEvent
 import nostr.postr.events.PrivateDmEvent
 import nostr.postr.events.TextNoteEvent
 import nostr.postr.toHex
+import kotlin.concurrent.thread
 
 val DefaultChannels = setOf(
-  "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb", // -> Anigma's Nostr
+  "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb", // -> Anigma's Nostr //Nostr public channel id: 25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb
   "42224859763652914db53052103f0b744df79dfc4efef7e950fc0802fc3df3c5"  // -> Amethyst's Group
 )
 
@@ -216,19 +221,25 @@ class Account(
 
   fun sendPost(message: String, replyTo: List<Note>?, mentions: List<User>?) {
     if (!isWriteable()) return
-
     val repliesToHex = replyTo?.map { it.idHex }
     val mentionsHex = mentions?.map { it.pubkeyHex }
 
-    val signedEvent = TextNoteEvent.create(
-      msg = message,
-      replyTos = repliesToHex,
-      mentions = mentionsHex,
-      privateKey = loggedIn.privKey!!
-    )
-    Log.d("TAG", "sendPost: "+signedEvent.toString());
-    Client.send(signedEvent)
-    LocalCache.consume(signedEvent)
+    Log.d("wangran", "message: ====>"+message);
+    val didTags = listOf<String>("test")
+
+    thread {
+      val signedEvent = MyEvent.create(
+        msg = message,
+        replyTos = repliesToHex,
+        mentions = mentionsHex,
+        didTags = didTags,
+        privateKey = loggedIn.privKey!!
+      )
+      Log.d("wangran", "sendPost: ====>"+signedEvent.toJson().toString());
+      Client.send(signedEvent)
+      LocalCache.consume(signedEvent)
+    }
+
   }
 
   fun sendChannelMeesage(message: String, toChannel: String, replyingTo: Note? = null, mentions: List<User>?) {
@@ -244,6 +255,8 @@ class Account(
       mentions = mentionsHex,
       privateKey = loggedIn.privKey!!
     )
+
+    Log.d("wangran", "sendChannelMeesage: ====>"+signedEvent.toString());
     Client.send(signedEvent)
     LocalCache.consume(signedEvent, null)
   }

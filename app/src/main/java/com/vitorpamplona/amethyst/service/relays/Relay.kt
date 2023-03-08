@@ -14,7 +14,7 @@ import okhttp3.WebSocketListener
 enum class FeedType {
     FOLLOWS, PUBLIC_CHATS, PRIVATE_DMS, GLOBAL
 }
-
+var TAG: String = "wangran"
 class Relay(
     var url: String,
     var read: Boolean = true,
@@ -74,6 +74,7 @@ class Relay(
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
                     try {
+                        Log.d(TAG, "onMessage: "+text)
                         val msg = Event.gson.fromJson(text, JsonElement::class.java).asJsonArray
                         val type = msg[0].asString
                         val channel = msg[1].asString
@@ -163,6 +164,7 @@ class Relay(
     }
 
     fun sendFilter(requestId: String) {
+        Log.d(TAG, "sendFilter: "+"requestId is "+requestId)
         if (read) {
             if (isConnected()) {
                 if (isReady) {
@@ -171,6 +173,10 @@ class Relay(
                         val request =
                             """["REQ","$requestId",${filters.take(10).joinToString(",") { it.filter.toJson() }}]"""
                         //println("FILTERSSENT ${url} ${request}")
+
+
+
+                        Log.d(TAG, "sendFilter: "+request)
                         socket?.send(request)
                     }
                 }
@@ -193,12 +199,16 @@ class Relay(
 
     fun send(signedEvent: Event) {
         if (write) {
+            Log.d(TAG, "send: "+"""["EVENT",${signedEvent.toJson()}]""")
             socket?.send("""["EVENT",${signedEvent.toJson()}]""")
             eventUploadCounter++
+        }else{
+            Log.d(TAG, "send: "+"xxx")
         }
     }
 
     fun close(subscriptionId: String){
+        Log.d(TAG, "close: "+"""["CLOSE","$subscriptionId"]""")
         socket?.send("""["CLOSE","$subscriptionId"]""")
     }
 

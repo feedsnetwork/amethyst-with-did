@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import com.vitorpamplona.amethyst.service.relays.Relay
+import com.vitorpamplona.amethyst.test.MyEvent
 import nostr.postr.events.ContactListEvent
 import nostr.postr.events.DeletionEvent
 import nostr.postr.events.Event
@@ -95,6 +96,45 @@ object LocalCache {
   }
 
   fun consume(event: TextNoteEvent, relay: Relay? = null) {
+    val note = getOrCreateNote(event.id.toHex())
+
+    val author = getOrCreateUser(event.pubKey.toHexKey())
+
+    if (relay != null) {
+      author.addRelay(relay, event.createdAt)
+      note.addRelay(relay)
+    }
+
+    // Already processed this event.
+    if (note.event != null) return
+
+    val mentions = event.mentions.map { getOrCreateUser(it) }
+    val replyTo = event.replyTos.map { getOrCreateNote(it) }
+
+    note.loadEvent(event, author, mentions, replyTo)
+
+    //Log.d("TN", "New Note (${notes.size},${users.size}) ${note.author?.toBestDisplayName()} ${note.event?.content?.take(100)} ${formattedDateTime(event.createdAt)}")
+
+    // Prepares user's profile view.
+    author.addNote(note)
+
+    // Adds notifications to users.
+    mentions.forEach {
+      it.addTaggedPost(note)
+    }
+    replyTo.forEach {
+      it.author?.addTaggedPost(note)
+    }
+
+    // Counts the replies
+    replyTo.forEach {
+      it.addReply(note)
+    }
+
+    refreshObservers()
+  }
+
+  fun consume(event: MyEvent, relay: Relay? = null) {
     val note = getOrCreateNote(event.id.toHex())
 
     val author = getOrCreateUser(event.pubKey.toHexKey())
@@ -404,6 +444,7 @@ object LocalCache {
   fun consume(event: ChannelMuteUserEvent) {
 
   }
+
 
   fun findUsersStartingWith(username: String): List<User> {
     return users.values.filter {

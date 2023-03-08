@@ -97,8 +97,10 @@ class NewPostViewModel: ViewModel() {
         }.joinToString("\n")
 
         if (originalNote?.channel != null) {
+            android.util.Log.d("wangran", "sendPost: 111111111111");
             account?.sendChannelMeesage(newMessage, originalNote!!.channel!!.idHex, originalNote!!, mentions)
         } else {
+            android.util.Log.d("wangran", "sendPost: 222222222");
             account?.sendPost(newMessage, replyTos, mentions)
         }
 
