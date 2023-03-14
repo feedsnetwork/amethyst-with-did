@@ -28,6 +28,7 @@ import com.vitorpamplona.amethyst.service.Nip19
 import com.vitorpamplona.amethyst.service.relays.Client
 import com.vitorpamplona.amethyst.ui.screen.AccountScreen
 import com.vitorpamplona.amethyst.ui.screen.AccountStateViewModel
+import com.vitorpamplona.amethyst.ui.screen.DidLoginScreen
 import com.vitorpamplona.amethyst.ui.theme.AmethystTheme
 import fr.acinq.secp256k1.Hex
 import nostr.postr.Persona
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
             AccountStateViewModel(LocalPreferences(applicationContext))
           }
 
-          AccountScreen(accountViewModel, startingPage)
+          DidLoginScreen(accountViewModel)
         }
       }
     }
