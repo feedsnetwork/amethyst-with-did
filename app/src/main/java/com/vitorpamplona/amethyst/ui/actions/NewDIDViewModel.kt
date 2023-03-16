@@ -21,10 +21,8 @@ class NewDIDViewModel: ViewModel() {
         scope.launch {
             try {
                 delay(100)
-                val didHelper: DIDHelper =
-                    DIDHelper()
-                didHelper.init()
-                didHelper.initDid()
+                val didHelper = DIDHelper()
+                didHelper.createNewDid()
                 Log.d(TAG, "create: ...")
             }catch (e: Exception){
                 Log.d(TAG, "create error : ..."+e.toString())

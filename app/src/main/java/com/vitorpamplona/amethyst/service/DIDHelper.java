@@ -22,20 +22,21 @@ public class DIDHelper {
     private static DID selfDid = null;
 
     private static String passphrase = "";
-    private static String storepass = "mypassword";
+    private String storepass = "mypassword";
     private static String storePath = "/storage/self/primary/tmp/";
     private static DIDStore store;
 
-    public DIDHelper(){
-        init();
-    }
-    public void init(){
+    public void createNewDid() throws DIDException {
         //init DIDBakckend
         initDIDBakckend();
 
         //init RootIdentity
         initRootIdentity();
+
+        //create did
+        initDid();
     }
+
 
     private void initDIDBakckend(){
         String rpcEndpoint = "mainnet";
@@ -62,7 +63,7 @@ public class DIDHelper {
             Log.d("wangran", "initRootIdentity: passphrase ====>"+passphrase);
             Log.d("wangran", "initRootIdentity: password====>"+storepass);
 
-            RootIdentity identity = RootIdentity.create(mnemonic, passphrase, store, storepass);
+            RootIdentity.create(mnemonic, passphrase, store, storepass);
 
         } catch (DIDStoreException e) {
             throw new RuntimeException(e);
@@ -101,6 +102,40 @@ public class DIDHelper {
         Log.d("wangran", "initDid: "+myDid);
         System.out.println("Created the new DID : " + myDid);
         return doc;
+    }
+
+    public void restore(String mnemonic, String passphrase) throws DIDException {
+        File storefile = Environment.getExternalStorageDirectory();
+        Log.d("wangran", "initRootIdentity: storefile====>"+storefile);
+        File storePath = new File(storefile.getAbsolutePath(), "newDir2");
+
+        deleteFile(storePath);
+
+        DIDStore store = DIDStore.open(storePath);
+
+        RootIdentity id = RootIdentity.create(mnemonic, passphrase, store, storepass);
+        id.synchronize();
+
+        List<DID> dids = store.listDids();
+        Log.d(TAG, dids.size() + " DIDs restored.");
+        if (dids.size() > 0) {
+            for (DID did : dids) {
+                Log.d(TAG, "DID is "+did.toString());
+                Log.d(TAG, "DIDDocument is "+store.loadDid(did).toString());
+            }
+        } else {
+            Log.d(TAG, "No dids restored.");
+        }
+    }
+
+    private static void deleteFile(File file) {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            for (File child : children)
+                deleteFile(child);
+        }
+
+        file.delete();
     }
 
     private static DID getDid(String didStr){
