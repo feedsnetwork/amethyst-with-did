@@ -23,6 +23,8 @@ import com.vitorpamplona.amethyst.model.User
 import com.vitorpamplona.amethyst.model.decodePublicKey
 import com.vitorpamplona.amethyst.model.toHexKey
 import com.vitorpamplona.amethyst.ui.actions.CloseButton
+import com.vitorpamplona.amethyst.ui.actions.NewDIDView
+import com.vitorpamplona.amethyst.ui.actions.NewUserMetadataView
 import com.vitorpamplona.amethyst.ui.navigation.ShowQRDialog
 import com.vitorpamplona.amethyst.ui.qrcode.DIDQrCodeScanner
 import com.vitorpamplona.amethyst.ui.qrcode.QrCodeScanner
@@ -35,6 +37,15 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel) {
     var termsAcceptanceIsRequired by remember { mutableStateOf("") }
     val uri = LocalUriHandler.current
     // store the dialog open or close state
+
+    var wantNewDID by remember {
+        mutableStateOf(false)
+    }
+
+    if (wantNewDID)
+        NewDIDView({ wantNewDID = false })
+
+
     var dialogOpen by remember {
         mutableStateOf(false)
     }
@@ -232,21 +243,7 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel) {
                 Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
                     Button(
                         onClick = {
-                            if (!acceptedTerms.value) {
-                                termsAcceptanceIsRequired = "Acceptance of terms is required"
-                            }
-
-                            if (key.value.text.isBlank()) {
-                                errorMessage = "Key is required"
-                            }
-
-                            if (acceptedTerms.value && key.value.text.isNotBlank()) {
-                                try {
-                                    accountViewModel.login(key.value.text)
-                                } catch (e: Exception) {
-                                    errorMessage = "Invalid key"
-                                }
-                            }
+                            wantNewDID = true
                         },
                         shape = RoundedCornerShape(35.dp),
                         modifier = Modifier

@@ -65,22 +65,20 @@ fun DIDQrCodeScanner(onScan: (String) -> Unit) {
         result?.let {
             Log.d("wangran", "DIDQrCodeScanner:11 result = "+it)
             try {
-                val nip19 = Nip19().uriToRoute(it)
-                val startingPage = when (nip19?.type) {
-                    Nip19.Type.USER -> "User/${nip19.hex}"
-                    Nip19.Type.NOTE -> "Note/${nip19.hex}"
-                    else -> null
+//                val nip19 = Nip19().uriToRoute(it)
+//                val startingPage = when (nip19?.type) {
+//                    Nip19.Type.USER -> "User/${nip19.hex}"
+//                    Nip19.Type.NOTE -> "Note/${nip19.hex}"
+//                    else -> null
+//                }
+//
+//                if (startingPage != null) {
+//                    onScan(startingPage)
+//                }
+                if (it != null){
+                    Log.d("wangran", "DIDQrCodeScanner:22 result = "+it)
+                    onScan(it)
                 }
-
-                if (startingPage != null) {
-                    onScan(startingPage)
-                }
-if (it != null){
-    Log.d("wangran", "DIDQrCodeScanner:22 result = "+it)
-    onScan(it)
-}
-
-
             } catch (e: Throwable) {
                 // QR can be anythign. do not throw errors.
             }
@@ -152,26 +150,38 @@ class DIDQRCodeAnalyzer(
 
     private val scanningOptions = BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build()
 
-    fun scanBarcodes(inputImage: InputImage) {
+    fun scanBarcodes(inputImage: InputImage, imageProxy:ImageProxy) {
+//        Log.d("wangran", "scanBarcodes0000: barcodes"+inputImage)
+
         BarcodeScanning.getClient(scanningOptions).process(inputImage)
             .addOnSuccessListener { barcodes ->
+                Log.d("wangran", "scanBarcodes: barcodes"+barcodes.toString())
 
                 if (barcodes.isNotEmpty()) {
-                    Log.d("wangran", "scanBarcodes: barcodes"+barcodes.toString())
+                    Log.d("wangran", "wangran scanBarcodes: barcodes"+barcodes.toString())
                     onQrCodeScanned(barcodes[0].displayValue)
                 }
             }
             .addOnFailureListener {
+                Log.d("wangran", "eeeeeeeeeeeeeE")
+
                 it.printStackTrace()
             }
+            .addOnCompleteListener{
+//                imageProxy.close();
+            }
+    }
+
+    fun test(){
+
     }
 
     @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
         imageProxy.image?.let { image ->
             val inputImage = InputImage.fromMediaImage(image, imageProxy.imageInfo.rotationDegrees)
-            scanBarcodes(inputImage)
+            scanBarcodes(inputImage,imageProxy)
         }
-        imageProxy.close()
+//        imageProxy.close()
     }
 }
