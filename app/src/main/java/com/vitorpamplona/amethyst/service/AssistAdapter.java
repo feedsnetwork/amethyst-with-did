@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.vitorpamplona.amethyst.test;
+package com.vitorpamplona.amethyst.service;
 
 import java.io.InputStream;
 import java.net.URL;

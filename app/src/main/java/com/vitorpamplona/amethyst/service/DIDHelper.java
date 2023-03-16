@@ -1,19 +1,12 @@
 package com.vitorpamplona.amethyst.service;
 
-import static androidx.core.app.ActivityCompat.startActivityForResult;
-
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
-
-import com.vitorpamplona.amethyst.test.AssistAdapter;
 
 import org.elastos.did.DID;
 import org.elastos.did.DIDBackend;
 import org.elastos.did.DIDDocument;
 import org.elastos.did.DIDStore;
-import org.elastos.did.DefaultDIDAdapter;
 import org.elastos.did.Mnemonic;
 import org.elastos.did.RootIdentity;
 import org.elastos.did.exception.DIDException;
@@ -22,7 +15,6 @@ import org.elastos.did.exception.DIDStoreException;
 import org.elastos.did.exception.MnemonicException;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 public class DIDHelper {
