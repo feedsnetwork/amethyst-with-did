@@ -50,7 +50,7 @@ import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun NewDIDView(onClose: () -> Unit) {
+fun NewDIDView(onClose: () -> Unit, onFinish: () -> Unit) {
     val newDIDViewModel: NewDIDViewModel = viewModel()
 
     LaunchedEffect(Unit) {
@@ -73,6 +73,26 @@ fun NewDIDView(onClose: () -> Unit) {
                         Text(text = "waitting...")
                     }
                     Text(text = "waitting...")
+
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+//                            if (newDIDViewModel.publishFinish) {
+//                                onConfirm()
+//                            }
+                            onClose()
+                            onFinish()
+                        },
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults
+                            .buttonColors(
+//                                backgroundColor = if (newDIDViewModel.publishFinish) MaterialTheme.colors.primary else Color.Gray
+                                backgroundColor = MaterialTheme.colors.primary
+                            )
+                    ) {
+                        Text(text = "Create", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+                    }
+
                 }
             }else {
                 Column(
@@ -114,7 +134,7 @@ fun NewDIDView(onClose: () -> Unit) {
 
                         ReadyCreateDIDButton(
                             onConfirm = {
-                                newDIDViewModel.create()
+//                                newDIDViewModel.create()//for test
                                 prepareCreate = true
                             },
                             newDIDViewModel.userName.value.isNotBlank()

@@ -22,7 +22,7 @@ public class DIDHelper {
     private static DID selfDid = null;
 
     private static String passphrase = "";
-    private String storepass = "mypassword";
+    private static String storepass = "mypassword";
     private static String storePath = "/storage/self/primary/tmp/";
     private static DIDStore store;
 

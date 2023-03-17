@@ -1,6 +1,8 @@
 package com.vitorpamplona.amethyst.ui.screen
 
 import android.util.Log
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,19 +20,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import com.vitorpamplona.amethyst.R
-import com.vitorpamplona.amethyst.model.LocalCache
-import com.vitorpamplona.amethyst.model.User
-import com.vitorpamplona.amethyst.model.decodePublicKey
-import com.vitorpamplona.amethyst.model.toHexKey
+import com.vitorpamplona.amethyst.buttons.NewNoteButton
 import com.vitorpamplona.amethyst.ui.actions.CloseButton
 import com.vitorpamplona.amethyst.ui.actions.NewDIDView
-import com.vitorpamplona.amethyst.ui.actions.NewUserMetadataView
-import com.vitorpamplona.amethyst.ui.navigation.ShowQRDialog
 import com.vitorpamplona.amethyst.ui.qrcode.DIDQrCodeScanner
-import com.vitorpamplona.amethyst.ui.qrcode.QrCodeScanner
+import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 
 @Composable
-fun DidLoginScreen(accountViewModel: AccountStateViewModel) {
+fun DidLoginScreen(accountViewModel: AccountStateViewModel, startingPage: String?) {
+    val TAG = "wangran"
     val key = remember { mutableStateOf(TextFieldValue("")) }
     var errorMessage by remember { mutableStateOf("") }
     val acceptedTerms = remember { mutableStateOf(false) }
@@ -41,15 +39,22 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel) {
     var wantNewDID by remember {
         mutableStateOf(false)
     }
+    var entryMainScreen by remember {
+        mutableStateOf(false)
+    }
 
     if (wantNewDID)
-        NewDIDView({ wantNewDID = false })
+        NewDIDView({ wantNewDID = false },{entryMainScreen = true})
 
 
     var dialogOpen by remember {
         mutableStateOf(false)
     }
-
+    if(entryMainScreen){
+//        val accountState by accountViewModel.accountContent.collectAsState()
+        Log.d(TAG, "DidLoginScreen: "+entryMainScreen)
+        AccountScreen(accountViewModel, startingPage)
+    }
     if (dialogOpen){
         Column(
             modifier = Modifier
@@ -116,7 +121,7 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel) {
 //            }
 
         }
-    }else{
+    }else if (!entryMainScreen){
         Column(
             modifier = Modifier
                 .fillMaxSize()

@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
             AccountStateViewModel(LocalPreferences(applicationContext))
           }
 
-          DidLoginScreen(accountViewModel)
+          DidLoginScreen(accountViewModel, startingPage)
         }
       }
     }
