@@ -1,16 +1,19 @@
 package com.vitorpamplona.amethyst.ui
 
+import android.Manifest
 import android.app.Activity
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.Coil
 import coil.ImageLoader
@@ -19,6 +22,9 @@ import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeCallback
+import com.journeyapps.barcodescanner.BarcodeResult
 import com.vitorpamplona.amethyst.EncryptedStorage
 import com.vitorpamplona.amethyst.LocalPreferences
 import com.vitorpamplona.amethyst.ServiceManager
@@ -33,10 +39,27 @@ import com.vitorpamplona.amethyst.ui.theme.AmethystTheme
 import fr.acinq.secp256k1.Hex
 import nostr.postr.Persona
 import nostr.postr.bechToBytes
+import com.journeyapps.barcodescanner.DecoratedBarcodeView
+import com.journeyapps.barcodescanner.DefaultDecoderFactory
+import com.vitorpamplona.amethyst.R
 
 class MainActivity : ComponentActivity() {
+  private val requestPermission =
+    registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+//      if (isGranted) {
+//        barcodeView.resume()
+//      }
+    }
+
+
+
+//  fun pauseBarcodeView(){
+//    barcodeView.pause()
+//  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
     ActivityCompat.shouldShowRequestPermissionRationale(this, "android.permission.WRITE_EXTERNAL_STORAGE")
 
     val nip19 = Nip19().uriToRoute(intent?.data?.toString())
@@ -68,7 +91,7 @@ class MainActivity : ComponentActivity() {
             AccountStateViewModel(LocalPreferences(applicationContext))
           }
 
-          DidLoginScreen(accountViewModel, startingPage)
+          DidLoginScreen(accountViewModel, layoutInflater, intent, startingPage)
         }
       }
     }
@@ -78,13 +101,16 @@ class MainActivity : ComponentActivity() {
 
   override fun onResume() {
     super.onResume()
+    requestPermission.launch(Manifest.permission.CAMERA)
 
     ServiceManager.start()
   }
 
   override fun onPause() {
     ServiceManager.pause()
-
+//    barcodeView.pause()
     super.onPause()
   }
+
+
 }

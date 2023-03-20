@@ -1,6 +1,9 @@
 package com.vitorpamplona.amethyst.ui.screen
 
+import android.content.Intent
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -11,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,23 +23,31 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.MutableLiveData
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeCallback
+import com.journeyapps.barcodescanner.BarcodeResult
+import com.journeyapps.barcodescanner.DecoratedBarcodeView
+import com.journeyapps.barcodescanner.DefaultDecoderFactory
 import com.vitorpamplona.amethyst.R
 import com.vitorpamplona.amethyst.buttons.NewNoteButton
+import com.vitorpamplona.amethyst.ui.MainActivity
 import com.vitorpamplona.amethyst.ui.actions.CloseButton
 import com.vitorpamplona.amethyst.ui.actions.NewDIDView
 import com.vitorpamplona.amethyst.ui.qrcode.DIDQrCodeScanner
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 
 @Composable
-fun DidLoginScreen(accountViewModel: AccountStateViewModel, startingPage: String?) {
+fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: LayoutInflater, intent: Intent, startingPage: String?) {
     val TAG = "wangran"
     val key = remember { mutableStateOf(TextFieldValue("")) }
     var errorMessage by remember { mutableStateOf("") }
     val acceptedTerms = remember { mutableStateOf(false) }
     var termsAcceptanceIsRequired by remember { mutableStateOf("") }
     val uri = LocalUriHandler.current
-    // store the dialog open or close state
-
+    lateinit var barcodeView: DecoratedBarcodeView
+    val text = MutableLiveData("")
     var wantNewDID by remember {
         mutableStateOf(false)
     }
@@ -56,71 +68,63 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, startingPage: String
         AccountScreen(accountViewModel, startingPage)
     }
     if (dialogOpen){
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colors.background)
-                .verticalScroll(rememberScrollState())
-                .fillMaxSize(),
-        ) {
-            // The first child is glued to the top.
-            // Hence we have nothing at the top, an empty box is used.
-            Box(modifier = Modifier.height(0.dp))
-
-            // The second child, this column, is centered vertically.
-            Column(
-                modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-
-                CloseButton(onCancel = {
-                    dialogOpen = false
-                })
-
-
-                Column(
-                    modifier = Modifier
-                        .padding(40.dp)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    DIDQrCodeScanner(onScan = { result ->
-                        run {
-                            Log.d("TAG", "DidLoginScreen: " + result)
-                        }
-                    })
+        val barcodeLayoutView = layoutInflater.inflate(R.layout.layout, null)
+        barcodeView = barcodeLayoutView.findViewById(R.id.barcode_scanner)
+        val formats = listOf(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39)
+        barcodeView.barcodeView.decoderFactory = DefaultDecoderFactory(formats)
+        barcodeView.initializeFromIntent(intent)
+        val callback = object : BarcodeCallback {
+            override fun barcodeResult(result: BarcodeResult) {
+                if (result.text == null || result.text == text.value) {
+                    return
                 }
+                text.value = result.text
             }
-//            Column(
-//                modifier = Modifier
-//                    .padding(20.dp)
-//                    .fillMaxSize(),
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//            ) {
-
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(10.dp),
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//
-//                }
-//
-//                Row(
-////                horizontalArrangement = Arrangement.Center,
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(30.dp)
-//                ) {
-//
-//                }
-//            }
-
         }
+        barcodeView.decodeContinuous(callback)
+        barcodeView.resume()
+        val state = text.observeAsState()
+        state.value?.let {
+            ScanQRCodeBox(barcodeLayoutView, it)
+        }
+//        Column(
+//            modifier = Modifier
+//                .background(MaterialTheme.colors.background)
+//                .verticalScroll(rememberScrollState())
+//                .fillMaxSize(),
+//        ) {
+////            // The first child is glued to the top.
+////            // Hence we have nothing at the top, an empty box is used.
+////            Box(modifier = Modifier.height(0.dp))
+////
+////            // The second child, this column, is centered vertically.
+////            Column(
+////                modifier = Modifier
+////                    .padding(20.dp)
+////                    .fillMaxSize(),
+////                horizontalAlignment = Alignment.CenterHorizontally,
+////            ) {
+////                CloseButton(onCancel = {
+////                    dialogOpen = false
+////                })
+////
+////
+////                Column(
+////                    modifier = Modifier
+////                        .padding(40.dp)
+////                        .fillMaxSize(),
+////                    horizontalAlignment = Alignment.CenterHorizontally,
+////                ) {
+////                    DIDQrCodeScanner(onScan = { result ->
+////                        run {
+////                            Log.d("TAG", "DidLoginScreen: " + result)
+////                        }
+////                    })
+////                }
+////            }
+//
+//
+//        }
     }else if (!entryMainScreen){
         Column(
             modifier = Modifier
@@ -320,5 +324,29 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, startingPage: String
 //        )
         }
     }
+    fun initBarcodeView(){
 
+    }
+}
+
+@Composable
+fun ScanQRCodeBox(root: View, value: String) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        AndroidView(modifier = Modifier.fillMaxSize(),
+            factory = {
+                root
+            })
+        if (value.isNotBlank()) {
+            Log.d("wangran", "ScanQRCodeBox: "+value)
+            Text(
+                modifier = Modifier.padding(16.dp),
+                text = value,
+                color = Color.White,
+                style = MaterialTheme.typography.h4
+            )
+        }
+    }
 }
