@@ -22,6 +22,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.*
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.MutableLiveData
@@ -35,6 +37,7 @@ import com.vitorpamplona.amethyst.buttons.NewNoteButton
 import com.vitorpamplona.amethyst.ui.MainActivity
 import com.vitorpamplona.amethyst.ui.actions.CloseButton
 import com.vitorpamplona.amethyst.ui.actions.NewDIDView
+import com.vitorpamplona.amethyst.ui.actions.RestoreDIDView
 import com.vitorpamplona.amethyst.ui.qrcode.DIDQrCodeScanner
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 
@@ -51,23 +54,30 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
     var wantNewDID by remember {
         mutableStateOf(false)
     }
+    var showScanner by remember {
+        mutableStateOf(false)
+    }
     var entryMainScreen by remember {
+        mutableStateOf(false)
+    }
+
+    var restoreDID by remember {
         mutableStateOf(false)
     }
 
     if (wantNewDID)
         NewDIDView({ wantNewDID = false },{entryMainScreen = true})
 
+    if (restoreDID)
+        RestoreDIDView { restoreDID = false }
 
-    var dialogOpen by remember {
-        mutableStateOf(false)
-    }
+
     if(entryMainScreen){
 //        val accountState by accountViewModel.accountContent.collectAsState()
         Log.d(TAG, "DidLoginScreen: "+entryMainScreen)
         AccountScreen(accountViewModel, startingPage)
     }
-    if (dialogOpen){
+    if (showScanner){
         val barcodeLayoutView = layoutInflater.inflate(R.layout.layout, null)
         barcodeView = barcodeLayoutView.findViewById(R.id.barcode_scanner)
         val formats = listOf(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39)
@@ -79,13 +89,18 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
                     return
                 }
                 text.value = result.text
+
+                showScanner = false
+                restoreDID = true
+                barcodeView.pause()
+
             }
         }
         barcodeView.decodeContinuous(callback)
         barcodeView.resume()
         val state = text.observeAsState()
         state.value?.let {
-            ScanQRCodeBox(barcodeLayoutView, it)
+            ScanQRCodeBox(barcodeLayoutView, it, onCloseScanner = { Log.d(TAG, "DidLoginScreen: close"); showScanner = false; barcodeView.pause()})
         }
 //        Column(
 //            modifier = Modifier
@@ -232,7 +247,7 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
                 Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
                     Button(
                         onClick = {
-                            dialogOpen = true
+                            showScanner = true
                         },
                         shape = RoundedCornerShape(35.dp),
                         modifier = Modifier
@@ -330,23 +345,39 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
 }
 
 @Composable
-fun ScanQRCodeBox(root: View, value: String) {
+fun ScanQRCodeBox(root: View, value: String, onCloseScanner: () -> Unit = {},) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
     ) {
-        AndroidView(modifier = Modifier.fillMaxSize(),
-            factory = {
-                root
-            })
-        if (value.isNotBlank()) {
-            Log.d("wangran", "ScanQRCodeBox: "+value)
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = value,
-                color = Color.White,
-                style = MaterialTheme.typography.h4
-            )
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Button(
+                onClick = {
+                    onCloseScanner()
+                },
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults
+                    .buttonColors(
+                        backgroundColor = Color.Gray
+                    )
+            ) {
+                Text(text = "close", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+            }
+            AndroidView(modifier = Modifier.fillMaxSize(),
+                factory = {
+                    root
+                })
+            if (value.isNotBlank()) {
+                Log.d("wangran", "ScanQRCodeBox: "+value)
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = value,
+                    color = Color.White,
+                    style = MaterialTheme.typography.h4
+                )
+            }
         }
     }
 }
