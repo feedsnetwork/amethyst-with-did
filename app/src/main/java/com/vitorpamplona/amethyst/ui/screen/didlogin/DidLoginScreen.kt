@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
@@ -38,16 +39,19 @@ import com.vitorpamplona.amethyst.ui.MainActivity
 import com.vitorpamplona.amethyst.ui.actions.CloseButton
 import com.vitorpamplona.amethyst.ui.actions.NewDIDView
 import com.vitorpamplona.amethyst.ui.actions.RestoreDIDView
+import com.vitorpamplona.amethyst.ui.actions.RestoreDIDViewModel
 import com.vitorpamplona.amethyst.ui.qrcode.DIDQrCodeScanner
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 
 @Composable
 fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: LayoutInflater, intent: Intent, startingPage: String?) {
+    val restoreDIDViewModel: RestoreDIDViewModel = viewModel()
     val TAG = "wangran"
     val key = remember { mutableStateOf(TextFieldValue("")) }
     var errorMessage by remember { mutableStateOf("") }
     val acceptedTerms = remember { mutableStateOf(false) }
     var termsAcceptanceIsRequired by remember { mutableStateOf("") }
+//    var mnemonic = ""
     val uri = LocalUriHandler.current
     lateinit var barcodeView: DecoratedBarcodeView
     val text = MutableLiveData("")
@@ -69,7 +73,7 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
         NewDIDView({ wantNewDID = false },{entryMainScreen = true})
 
     if (restoreDID)
-        RestoreDIDView { restoreDID = false }
+        RestoreDIDView (restoreDIDViewModel, { restoreDID = false })
 
 
     if(entryMainScreen){
@@ -89,57 +93,26 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
                     return
                 }
                 text.value = result.text
-
-                showScanner = false
-                restoreDID = true
-                barcodeView.pause()
-
             }
         }
         barcodeView.decodeContinuous(callback)
         barcodeView.resume()
         val state = text.observeAsState()
         state.value?.let {
-            ScanQRCodeBox(barcodeLayoutView, it, onCloseScanner = { Log.d(TAG, "DidLoginScreen: close"); showScanner = false; barcodeView.pause()})
+            ScanQRCodeBox(barcodeLayoutView, it,
+                onCloseScanner = {
+                    Log.d(TAG, "DidLoginScreen: close");
+                    showScanner = false;
+                    barcodeView.pause()
+                },
+                onFinish ={
+                    restoreDIDViewModel.mnemonic = it
+                    showScanner = false
+                    restoreDID = true
+                    barcodeView.pause()
+                    Log.d(TAG, "DidLoginScreen: "+restoreDIDViewModel.mnemonic)
+                })
         }
-//        Column(
-//            modifier = Modifier
-//                .background(MaterialTheme.colors.background)
-//                .verticalScroll(rememberScrollState())
-//                .fillMaxSize(),
-//        ) {
-////            // The first child is glued to the top.
-////            // Hence we have nothing at the top, an empty box is used.
-////            Box(modifier = Modifier.height(0.dp))
-////
-////            // The second child, this column, is centered vertically.
-////            Column(
-////                modifier = Modifier
-////                    .padding(20.dp)
-////                    .fillMaxSize(),
-////                horizontalAlignment = Alignment.CenterHorizontally,
-////            ) {
-////                CloseButton(onCancel = {
-////                    dialogOpen = false
-////                })
-////
-////
-////                Column(
-////                    modifier = Modifier
-////                        .padding(40.dp)
-////                        .fillMaxSize(),
-////                    horizontalAlignment = Alignment.CenterHorizontally,
-////                ) {
-////                    DIDQrCodeScanner(onScan = { result ->
-////                        run {
-////                            Log.d("TAG", "DidLoginScreen: " + result)
-////                        }
-////                    })
-////                }
-////            }
-//
-//
-//        }
     }else if (!entryMainScreen){
         Column(
             modifier = Modifier
@@ -171,78 +144,6 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
                 Text(text = "Web3 社交网络")
 
                 Spacer(modifier = Modifier.height(40.dp))
-
-//            var showPassword by remember {
-//                mutableStateOf(false)
-//            }
-//
-//            OutlinedTextField(
-//                value = key.value,
-//                onValueChange = { key.value = it },
-//                keyboardOptions = KeyboardOptions(
-//                    autoCorrect = false,
-//                    keyboardType = KeyboardType.Ascii,
-//                    imeAction = ImeAction.Go
-//                ),
-//                placeholder = {
-//                    Text(
-//                        text = "nsec / npub / hex private key",
-//                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                    )
-//                },
-//                trailingIcon = {
-//                    IconButton(onClick = { showPassword = !showPassword }) {
-//                        Icon(
-//                            imageVector = if (showPassword) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
-//                            contentDescription = if (showPassword) "Show Password" else "Hide Password"
-//                        )
-//                    }
-//                },
-//                visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-//                keyboardActions = KeyboardActions(
-//                    onGo = {
-//                        try {
-//                            accountViewModel.login(key.value.text)
-//                        } catch (e: Exception) {
-//                            errorMessage = "Invalid key"
-//                        }
-//                    }
-//                )
-//            )
-//            if (errorMessage.isNotBlank()) {
-//                Text(
-//                    text = errorMessage,
-//                    color = MaterialTheme.colors.error,
-//                    style = MaterialTheme.typography.caption
-//                )
-//            }
-//
-//            Spacer(modifier = Modifier.height(20.dp))
-//
-//            Row(verticalAlignment = Alignment.CenterVertically) {
-//                Checkbox(
-//                    checked = acceptedTerms.value,
-//                    onCheckedChange = { acceptedTerms.value = it }
-//                )
-//
-//                Text(text = "I accept the ")
-//
-//                ClickableText(
-//                    text = AnnotatedString("terms of use"),
-//                    onClick = { runCatching { uri.openUri("https://github.com/vitorpamplona/amethyst/blob/main/PRIVACY.md") } },
-//                    style = LocalTextStyle.current.copy(color = MaterialTheme.colors.primary),
-//                )
-//            }
-//
-//            if (termsAcceptanceIsRequired.isNotBlank()) {
-//                Text(
-//                    text = termsAcceptanceIsRequired,
-//                    color = MaterialTheme.colors.error,
-//                    style = MaterialTheme.typography.caption
-//                )
-//            }
-
-                Spacer(modifier = Modifier.height(20.dp))
 
                 Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
                     Button(
@@ -345,7 +246,7 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
 }
 
 @Composable
-fun ScanQRCodeBox(root: View, value: String, onCloseScanner: () -> Unit = {},) {
+fun ScanQRCodeBox(root: View, value: String, onCloseScanner: () -> Unit = {},onFinish: (scannerResult: String) -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
@@ -371,12 +272,14 @@ fun ScanQRCodeBox(root: View, value: String, onCloseScanner: () -> Unit = {},) {
                 })
             if (value.isNotBlank()) {
                 Log.d("wangran", "ScanQRCodeBox: "+value)
+
                 Text(
                     modifier = Modifier.padding(16.dp),
                     text = value,
                     color = Color.White,
                     style = MaterialTheme.typography.h4
                 )
+                onFinish(value)
             }
         }
     }

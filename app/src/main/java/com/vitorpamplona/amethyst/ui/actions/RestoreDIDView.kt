@@ -1,5 +1,6 @@
 package com.vitorpamplona.amethyst.ui.actions
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,9 +51,7 @@ import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RestoreDIDView(onClose: () -> Unit) {
-    val newDIDViewModel: NewDIDViewModel = viewModel()
-
+fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onClose: () -> Unit) {
     LaunchedEffect(Unit) {
     }
 
@@ -65,9 +64,12 @@ fun RestoreDIDView(onClose: () -> Unit) {
     ) {
         Surface(
         ) {
-            var prepareCreate by remember { mutableStateOf(false) }
-            if (prepareCreate) {
-                Column(modifier = Modifier.padding(10.dp).height(350.dp).fillMaxWidth()
+            var prepareRestore by remember { mutableStateOf(false) }
+            if (prepareRestore) {
+                Column(modifier = Modifier
+                    .padding(10.dp)
+                    .height(350.dp)
+                    .fillMaxWidth()
                 ) {
 //                    Column(modifier = Modifier.align(Alignment.End)) {
 //                        Text(text = "waitting...")
@@ -92,7 +94,10 @@ fun RestoreDIDView(onClose: () -> Unit) {
                 }
             }else {
                 Column(
-                    modifier = Modifier.padding(10.dp).height(350.dp).fillMaxWidth()
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .height(350.dp)
+                        .fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.align(Alignment.End)) {
                         CloseButton(onCancel = {
@@ -103,19 +108,7 @@ fun RestoreDIDView(onClose: () -> Unit) {
                     Spacer(modifier = Modifier.height(100.dp))
 
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(
-                            label = { Text(text = "Username") },
-                            modifier = Modifier.weight(1f),
-                            value = newDIDViewModel.userName.value,
-                            onValueChange = { newDIDViewModel.userName.value = it },
-                            placeholder = {
-                                Text(
-                                    text = "My username",
-                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-                                )
-                            },
-                            singleLine = true
-                        )
+                        Text("wait")
                     }
 
                     Spacer(modifier = Modifier.height(30.dp))
@@ -127,114 +120,16 @@ fun RestoreDIDView(onClose: () -> Unit) {
 ////                            postViewModel.clear()
 //                            onClose()
 //                        })
-
-                        ReadyCreateDIDButton(
+                        Log.d(TAG, "RestoreDIDView: "+restoreDIDViewModel.mnemonic)
+                        RestoreDIDButton(
                             onConfirm = {
-//                                newDIDViewModel.create()//For test
-                                prepareCreate = true
+                                restoreDIDViewModel.restore()
+                                prepareRestore = true
                             },
-                            newDIDViewModel.userName.value.isNotBlank()
+                            restoreDIDViewModel.mnemonic.isNotBlank()
                         )
                     }
-//
-//                    OutlinedTextField(
-//                        label = { Text(text = "About me") },
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .height(100.dp),
-//                        value = postViewModel.about.value,
-//                        onValueChange = { postViewModel.about.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "About me",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        keyboardOptions = KeyboardOptions.Default.copy(
-//                            capitalization = KeyboardCapitalization.Sentences
-//                        ),
-//                        maxLines = 10
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(10.dp))
-//
-//                    OutlinedTextField(
-//                        label = { Text(text = "Avatar URL") },
-//                        modifier = Modifier.fillMaxWidth(),
-//                        value = postViewModel.picture.value,
-//                        onValueChange = { postViewModel.picture.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "https://mywebsite.com/me.jpg",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        singleLine = true
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(10.dp))
-//
-//                    OutlinedTextField(
-//                        label = { Text(text = "Banner URL") },
-//                        modifier = Modifier.fillMaxWidth(),
-//                        value = postViewModel.banner.value,
-//                        onValueChange = { postViewModel.banner.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "https://mywebsite.com/mybanner.jpg",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        singleLine = true
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(10.dp))
-//
-//                    OutlinedTextField(
-//                        label = { Text(text = "Website URL") },
-//                        modifier = Modifier.fillMaxWidth(),
-//                        value = postViewModel.website.value,
-//                        onValueChange = { postViewModel.website.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "https://mywebsite.com",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        singleLine = true
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(10.dp))
-//
-//                    OutlinedTextField(
-//                        label = { Text(text = "NIP-05") },
-//                        modifier = Modifier.fillMaxWidth(),
-//                        value = postViewModel.nip05.value,
-//                        onValueChange = { postViewModel.nip05.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "_@mywebsite.com",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        singleLine = true
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(10.dp))
-//                    OutlinedTextField(
-//                        label = { Text(text = "LN Address") },
-//                        modifier = Modifier.fillMaxWidth(),
-//                        value = postViewModel.lnAddress.value,
-//                        onValueChange = { postViewModel.lnAddress.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "me@mylightiningnode.com",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        singleLine = true
-//                    )
-            }
+                }
             }
         }
     }

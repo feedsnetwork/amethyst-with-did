@@ -11,31 +11,21 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class RestoreDIDViewModel: ViewModel() {
-
-    val userName = mutableStateOf("")
-
-    fun create() {
-
+    var mnemonic = ""
+    fun restore() {
+        Log.d(TAG, "restore: mnemonic"+mnemonic)
         val scope = CoroutineScope(Job() + Dispatchers.IO)
         scope.launch {
             try {
                 delay(100)
                 val didHelper = DIDHelper()
-                didHelper.createNewDid()
-                Log.d(TAG, "create: ...")
+                didHelper.restore(mnemonic)
+                Log.d(TAG, "Restore: ...")
             }catch (e: Exception){
                 Log.d(TAG, "create error : ..."+e.toString())
             }
-
-
-//            try {
-//
-//            } finally {
-////                withContext(NonCancellable) {
-////                    handlerWaiting.set(false)
-////                }
-//            }
         }
+
     }
 
 

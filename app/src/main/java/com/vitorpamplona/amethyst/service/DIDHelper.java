@@ -26,7 +26,7 @@ public class DIDHelper {
     private static String storePath = "/storage/self/primary/tmp/";
     private static DIDStore store;
 
-    public void createNewDid() throws DIDException {
+    public DIDDocument createNewDid() throws DIDException {
         //init DIDBakckend
         initDIDBakckend();
 
@@ -34,7 +34,7 @@ public class DIDHelper {
         initRootIdentity();
 
         //create did
-        initDid();
+        return initDid();
     }
 
 
@@ -104,6 +104,10 @@ public class DIDHelper {
         return doc;
     }
 
+    public void restore(String mnemonic) throws DIDException {
+        initDIDBakckend();
+        restore(mnemonic, passphrase);
+    }
     public void restore(String mnemonic, String passphrase) throws DIDException {
         File storefile = Environment.getExternalStorageDirectory();
         Log.d("wangran", "initRootIdentity: storefile====>"+storefile);
@@ -118,6 +122,7 @@ public class DIDHelper {
 
         List<DID> dids = store.listDids();
         Log.d(TAG, dids.size() + " DIDs restored.");
+        Log.d(TAG, dids.get(0).toString() + " dids.get(0).toString()");
         if (dids.size() > 0) {
             for (DID did : dids) {
                 Log.d(TAG, "DID is "+did.toString());

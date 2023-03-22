@@ -17,7 +17,7 @@ const val TAG = "wangran"
 class NewDIDViewModel: ViewModel() {
     val userName = mutableStateOf("")
     var publishFinish = false;
-
+    var did = ""
     fun create() {
 
         val scope = CoroutineScope(Job() + Dispatchers.IO)
@@ -25,7 +25,7 @@ class NewDIDViewModel: ViewModel() {
             try {
                 delay(100)
                 val didHelper = DIDHelper()
-                didHelper.createNewDid()
+                val didDocument = didHelper.createNewDid()
                 Log.d(TAG, "create: ...")
                 publishFinish = true
             }catch (e: Exception){

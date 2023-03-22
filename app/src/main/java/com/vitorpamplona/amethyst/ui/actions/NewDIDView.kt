@@ -1,5 +1,6 @@
 package com.vitorpamplona.amethyst.ui.actions
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,7 +68,9 @@ fun NewDIDView(onClose: () -> Unit, onFinish: () -> Unit) {
         ) {
             var prepareCreate by remember { mutableStateOf(false) }
             if (prepareCreate) {
-                Column(modifier = Modifier.padding(10.dp).height(350.dp)
+                Column(modifier = Modifier
+                    .padding(10.dp)
+                    .height(350.dp)
                 ) {
                     Column(modifier = Modifier.align(Alignment.End)) {
                         Text(text = "waitting...")
@@ -96,7 +99,9 @@ fun NewDIDView(onClose: () -> Unit, onFinish: () -> Unit) {
                 }
             }else {
                 Column(
-                    modifier = Modifier.padding(10.dp).height(350.dp)
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .height(350.dp)
                 ) {
                     Column(modifier = Modifier.align(Alignment.End)) {
                         CloseButton(onCancel = {
@@ -134,8 +139,10 @@ fun NewDIDView(onClose: () -> Unit, onFinish: () -> Unit) {
 
                         ReadyCreateDIDButton(
                             onConfirm = {
-//                                newDIDViewModel.create()//for test
+                                val did = newDIDViewModel.create()//for test
                                 prepareCreate = true
+
+                                Log.d(TAG, "NewDIDView: did is$did")
                             },
                             newDIDViewModel.userName.value.isNotBlank()
                         )
