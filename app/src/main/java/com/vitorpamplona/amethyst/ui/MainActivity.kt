@@ -91,7 +91,8 @@ class MainActivity : ComponentActivity() {
             AccountStateViewModel(LocalPreferences(applicationContext))
           }
 
-          DidLoginScreen(accountViewModel, layoutInflater, intent, startingPage)
+          AccountScreen(accountStateViewModel = accountViewModel, layoutInflater, intent, startingPage = startingPage)
+//          DidLoginScreen(accountViewModel, layoutInflater, intent, startingPage)
         }
       }
     }

@@ -51,14 +51,16 @@ import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun NewDIDView(onClose: () -> Unit, onFinish: () -> Unit) {
+fun NewDIDView(onFinish: (type: Int, did: String) -> Unit) {
+    //type 0 cancel, 1 finish
     val newDIDViewModel: NewDIDViewModel = viewModel()
+
 
     LaunchedEffect(Unit) {
     }
 
     Dialog(
-        onDismissRequest = { onClose() },
+        onDismissRequest = { onFinish(0,"") },
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
             dismissOnClickOutside = false
@@ -83,8 +85,14 @@ fun NewDIDView(onClose: () -> Unit, onFinish: () -> Unit) {
 //                            if (newDIDViewModel.publishFinish) {
 //                                onConfirm()
 //                            }
-                            onClose()
-                            onFinish()
+                            newDIDViewModel.create { didString ->
+                                run {
+                                    Log.d(TAG, "NewDIDView: did is $didString")
+                                    if (didString.isNotBlank()){
+                                        onFinish(1,didString)
+                                    }
+                                }
+                            }
                         },
                         shape = RoundedCornerShape(20.dp),
                         colors = ButtonDefaults
@@ -105,7 +113,7 @@ fun NewDIDView(onClose: () -> Unit, onFinish: () -> Unit) {
                 ) {
                     Column(modifier = Modifier.align(Alignment.End)) {
                         CloseButton(onCancel = {
-                            onClose()
+                            onFinish(0,"")
                         })
                     }
 
@@ -139,113 +147,12 @@ fun NewDIDView(onClose: () -> Unit, onFinish: () -> Unit) {
 
                         ReadyCreateDIDButton(
                             onConfirm = {
-                                val did = newDIDViewModel.create()//for test
                                 prepareCreate = true
-
-                                Log.d(TAG, "NewDIDView: did is$did")
                             },
                             newDIDViewModel.userName.value.isNotBlank()
                         )
                     }
-//
-//                    OutlinedTextField(
-//                        label = { Text(text = "About me") },
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .height(100.dp),
-//                        value = postViewModel.about.value,
-//                        onValueChange = { postViewModel.about.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "About me",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        keyboardOptions = KeyboardOptions.Default.copy(
-//                            capitalization = KeyboardCapitalization.Sentences
-//                        ),
-//                        maxLines = 10
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(10.dp))
-//
-//                    OutlinedTextField(
-//                        label = { Text(text = "Avatar URL") },
-//                        modifier = Modifier.fillMaxWidth(),
-//                        value = postViewModel.picture.value,
-//                        onValueChange = { postViewModel.picture.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "https://mywebsite.com/me.jpg",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        singleLine = true
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(10.dp))
-//
-//                    OutlinedTextField(
-//                        label = { Text(text = "Banner URL") },
-//                        modifier = Modifier.fillMaxWidth(),
-//                        value = postViewModel.banner.value,
-//                        onValueChange = { postViewModel.banner.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "https://mywebsite.com/mybanner.jpg",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        singleLine = true
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(10.dp))
-//
-//                    OutlinedTextField(
-//                        label = { Text(text = "Website URL") },
-//                        modifier = Modifier.fillMaxWidth(),
-//                        value = postViewModel.website.value,
-//                        onValueChange = { postViewModel.website.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "https://mywebsite.com",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        singleLine = true
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(10.dp))
-//
-//                    OutlinedTextField(
-//                        label = { Text(text = "NIP-05") },
-//                        modifier = Modifier.fillMaxWidth(),
-//                        value = postViewModel.nip05.value,
-//                        onValueChange = { postViewModel.nip05.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "_@mywebsite.com",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        singleLine = true
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(10.dp))
-//                    OutlinedTextField(
-//                        label = { Text(text = "LN Address") },
-//                        modifier = Modifier.fillMaxWidth(),
-//                        value = postViewModel.lnAddress.value,
-//                        onValueChange = { postViewModel.lnAddress.value = it },
-//                        placeholder = {
-//                            Text(
-//                                text = "me@mylightiningnode.com",
-//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-//                            )
-//                        },
-//                        singleLine = true
-//                    )
-            }
+                }
             }
         }
     }

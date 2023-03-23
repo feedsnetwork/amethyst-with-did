@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vitorpamplona.amethyst.LocalPreferences
 import com.vitorpamplona.amethyst.ServiceManager
+import com.vitorpamplona.amethyst.did.DIDPersona
 import com.vitorpamplona.amethyst.model.Account
 import fr.acinq.secp256k1.Hex
 import java.util.regex.Pattern
@@ -27,19 +28,19 @@ class AccountStateViewModel(private val localPreferences: LocalPreferences): Vie
   }
 
   fun login(key: String) {
-    val pattern = Pattern.compile(".+@.+\\.[a-z]+")
-
-    val account =
-      if (key.startsWith("nsec")) {
-        Account(Persona(privKey = key.bechToBytes()))
-      } else if (key.startsWith("npub")) {
-        Account(Persona(pubKey = key.bechToBytes()))
-      } else if (pattern.matcher(key).matches()) {
-        // Evaluate NIP-5
-        Account(Persona())
-      } else {
-        Account(Persona(Hex.decode(key)))
-      }
+//    val pattern = Pattern.compile(".+@.+\\.[a-z]+")
+//    val account =
+//      if (key.startsWith("nsec")) {
+//        Account(Persona(privKey = key.bechToBytes()))
+//      } else if (key.startsWith("npub")) {
+//        Account(Persona(pubKey = key.bechToBytes()))
+//      } else if (pattern.matcher(key).matches()) {
+//        // Evaluate NIP-5
+//        Account(Persona())
+//      } else {
+//        Account(Persona(Hex.decode(key)))
+//      }
+    val account = Account(DIDPersona(pubKey = key.toByteArray()))
 
     localPreferences.saveToEncryptedStorage(account)
 
@@ -47,7 +48,7 @@ class AccountStateViewModel(private val localPreferences: LocalPreferences): Vie
   }
 
   fun newKey() {
-    val account = Account(Persona())
+    val account = Account(DIDPersona(pubKey ="".toByteArray()))
     localPreferences.saveToEncryptedStorage(account)
     login(account)
   }

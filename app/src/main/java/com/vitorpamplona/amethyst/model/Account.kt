@@ -1,14 +1,11 @@
 package com.vitorpamplona.amethyst.model
 
 import android.content.res.Resources
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Text
 import androidx.core.os.ConfigurationCompat
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
+import com.vitorpamplona.amethyst.did.DIDPersona
+import com.vitorpamplona.amethyst.service.DIDHelper
 import com.vitorpamplona.amethyst.service.relays.Constants
 import com.vitorpamplona.amethyst.service.model.ChannelCreateEvent
 import com.vitorpamplona.amethyst.service.model.ChannelMessageEvent
@@ -31,13 +28,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import nostr.postr.Contact
-import nostr.postr.Persona
 import nostr.postr.Utils
 import nostr.postr.events.ContactListEvent
 import nostr.postr.events.Event
 import nostr.postr.events.MetadataEvent
 import nostr.postr.events.PrivateDmEvent
-import nostr.postr.events.TextNoteEvent
 import nostr.postr.toHex
 import kotlin.concurrent.thread
 
@@ -56,7 +51,7 @@ fun getLanguagesSpokenByUser(): Set<String> {
 }
 
 class Account(
-  val loggedIn: Persona,
+  val loggedIn: DIDPersona,
   var followingChannels: Set<String> = DefaultChannels,
   var hiddenUsers: Set<String> = setOf(),
   var localRelays: Set<NewRelayListViewModel.Relay> = Constants.defaultRelays.toSet(),
@@ -100,13 +95,18 @@ class Account(
     if (!isWriteable()) return
 
     loggedIn.privKey?.let {
+      val didString = String(it);
+
       val createdAt = Date().time / 1000
       val content = toString
       val pubKey = Utils.pubkeyCreate(it)
       val tags = listOf<List<String>>()
       val id = Event.generateId(pubKey, createdAt, MetadataEvent.kind, tags, content)
-      val sig = Utils.sign(id, it)
-      val event = MetadataEvent(id, pubKey, createdAt, tags, content, sig)
+//      val sig = Utils.sign(id, it)
+      val sig = DIDHelper.signData(didString,id)
+      val sigByteArray = sig.toByteArray()
+
+      val event = MetadataEvent(id, pubKey, createdAt, tags, content, sigByteArray)
 
       Client.send(event)
       LocalCache.consume(event)

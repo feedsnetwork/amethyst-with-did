@@ -2,6 +2,7 @@ package com.vitorpamplona.amethyst.test
 
 import android.util.Log
 import com.vitorpamplona.amethyst.model.toByteArray
+import com.vitorpamplona.amethyst.service.DIDHelper
 import fr.acinq.secp256k1.Secp256k1
 import fr.acinq.secp256k1.Secp256k1Exception
 import nostr.postr.Utils
@@ -138,7 +139,7 @@ class MyEvent(
 
             val sig = Utils.sign(id, privateKey)
 
-//            val sigStr = DIDHelper.signData(diddocument, id);
+//            val sigStr = DIDHelper.signData(pubKey, id);
 
 //            Log.d("wangran", "create: sigStr = "+sigStr);
 //            val sig = sigStr.toByteArray();
@@ -151,7 +152,7 @@ class MyEvent(
             return MyEvent(id, pubKey, createdAt, tags, msg, sig)
         }
 
-        public fun pubKeyCompress(pubkey: ByteArray): ByteArray {
+        fun pubKeyCompress(pubkey: ByteArray): ByteArray {
             return when {
                 pubkey.size == 33 && (pubkey[0] == 2.toByte() || pubkey[0] == 3.toByte()) -> pubkey
                 pubkey.size == 65 && pubkey[0] == 4.toByte() -> {

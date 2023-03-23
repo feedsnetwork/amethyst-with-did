@@ -18,7 +18,7 @@ class NewDIDViewModel: ViewModel() {
     val userName = mutableStateOf("")
     var publishFinish = false;
     var did = ""
-    fun create() {
+    fun create(onSuccess: (didString: String) -> Unit) {//TODO ONFINISH
 
         val scope = CoroutineScope(Job() + Dispatchers.IO)
         scope.launch {
@@ -26,20 +26,13 @@ class NewDIDViewModel: ViewModel() {
                 delay(100)
                 val didHelper = DIDHelper()
                 val didDocument = didHelper.createNewDid()
-                Log.d(TAG, "create: ...")
+                val didString = didDocument.subject.toString()
+                Log.d(TAG, "create: ..."+didString)
                 publishFinish = true
+                onSuccess(didString)
             }catch (e: Exception){
                 Log.d(TAG, "create error : ..."+e.toString())
             }
-
-
-//            try {
-//
-//            } finally {
-////                withContext(NonCancellable) {
-////                    handlerWaiting.set(false)
-////                }
-//            }
         }
     }
 

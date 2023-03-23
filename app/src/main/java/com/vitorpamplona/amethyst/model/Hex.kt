@@ -1,5 +1,6 @@
 package com.vitorpamplona.amethyst.model
 
+import com.vitorpamplona.amethyst.did.DIDPersona
 import com.vitorpamplona.amethyst.ui.note.toShortenHex
 import fr.acinq.secp256k1.Hex
 import java.util.regex.Pattern
@@ -37,12 +38,14 @@ fun HexKey.toDisplayHexKey(): String {
 }
 
 fun decodePublicKey(key: String): ByteArray {
-  return if (key.startsWith("nsec")) {
-    Persona(privKey = key.bechToBytes()).pubKey
-  } else if (key.startsWith("npub")) {
-    key.bechToBytes()
-  } else { //if (pattern.matcher(key).matches()) {
-  //} else {
-    Hex.decode(key)
-  }
+//  return if (key.startsWith("nsec")) {
+//    Persona(privKey = key.bechToBytes()).pubKey
+//  } else if (key.startsWith("npub")) {
+//    key.bechToBytes()
+//  } else { //if (pattern.matcher(key).matches()) {
+//  //} else {
+//    Hex.decode(key)
+//  }
+
+  return key.toByteArray()
 }

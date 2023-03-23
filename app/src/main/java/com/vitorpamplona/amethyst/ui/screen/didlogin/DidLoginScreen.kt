@@ -42,10 +42,12 @@ import com.vitorpamplona.amethyst.ui.actions.RestoreDIDView
 import com.vitorpamplona.amethyst.ui.actions.RestoreDIDViewModel
 import com.vitorpamplona.amethyst.ui.qrcode.DIDQrCodeScanner
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
+import nostr.postr.toHex
 
 @Composable
 fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: LayoutInflater, intent: Intent, startingPage: String?) {
     val restoreDIDViewModel: RestoreDIDViewModel = viewModel()
+    var cachedDID = "";
     val TAG = "wangran"
     val key = remember { mutableStateOf(TextFieldValue("")) }
     var errorMessage by remember { mutableStateOf("") }
@@ -55,6 +57,9 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
     val uri = LocalUriHandler.current
     lateinit var barcodeView: DecoratedBarcodeView
     val text = MutableLiveData("")
+    var hideAll by remember {
+        mutableStateOf(false)
+    }
     var wantNewDID by remember {
         mutableStateOf(false)
     }
@@ -69,17 +74,70 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
         mutableStateOf(false)
     }
 
-    if (wantNewDID)
-        NewDIDView({ wantNewDID = false },{entryMainScreen = true})
+    if (wantNewDID){
+//        NewDIDView(onFinish = {type, did ->
+//            run {
+//                if (type == 0) {
+//                    wantNewDID = false
+//                } else {
+//                    cachedDID = did
+//                    entryMainScreen = true
+//                }
+//            }
+//        })
+
+        //TEST
+//        val test = "did:elastos:iWkzDzneEHFPXJ7ho2998uv1YX3Aewj58S"
+//        val testByteArray = test.toByteArray()
+//        val result = testByteArray.toHex()
+//        Log.d(TAG, "result: $result")
+
+        cachedDID = "did:elastos:iWkzDzneEHFPXJ7ho2998uv1YX3Aewj58S"
+        entryMainScreen = true
+    }
+
 
     if (restoreDID)
         RestoreDIDView (restoreDIDViewModel, { restoreDID = false })
 
 
     if(entryMainScreen){
+        Log.d(TAG, "DidLoginScreen0000: "+entryMainScreen)
+//        AccountScreen(accountViewModel, startingPage)
+        Log.d(TAG, "DidLoginScreen1111: "+cachedDID)
+        accountViewModel.login(cachedDID)
+        wantNewDID = false
+        entryMainScreen = false
+        Log.d(TAG, "DidLoginScreen2222: "+entryMainScreen)
+        hideAll = true
+//
 //        val accountState by accountViewModel.accountContent.collectAsState()
-        Log.d(TAG, "DidLoginScreen: "+entryMainScreen)
-        AccountScreen(accountViewModel, startingPage)
+//
+//        Crossfade(targetState = accountState, animationSpec = tween(durationMillis = 100),
+//            label = ""
+//        ) { state ->
+//            when (state) {
+//                is AccountState.LoggedOff -> {
+//                    entryMainScreen = false
+//                    hideAll = true
+//                    DidLoginScreen(accountViewModel, layoutInflater, intent, startingPage)
+//
+//                }
+//                is AccountState.LoggedIn -> {
+//                    entryMainScreen = false
+//                    hideAll = true
+//                    MainScreen(AccountViewModel(state.account), accountViewModel, startingPage)
+//
+//                }
+//                is AccountState.LoggedInViewOnly -> {
+//                    entryMainScreen = false
+//                    hideAll = true
+//                    MainScreen(AccountViewModel(state.account), accountViewModel, startingPage)
+//
+//                }
+//            }
+//        }
+
     }
     if (showScanner){
         val barcodeLayoutView = layoutInflater.inflate(R.layout.layout, null)
@@ -113,7 +171,7 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
                     Log.d(TAG, "DidLoginScreen: "+restoreDIDViewModel.mnemonic)
                 })
         }
-    }else if (!entryMainScreen){
+    }else if (!entryMainScreen&& !hideAll){
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -188,21 +246,23 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
                 Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
                     Button(
                         onClick = {
-                            if (!acceptedTerms.value) {
-                                termsAcceptanceIsRequired = "Acceptance of terms is required"
-                            }
+//                            if (!acceptedTerms.value) {
+//                                termsAcceptanceIsRequired = "Acceptance of terms is required"
+//                            }
+//
+//                            if (key.value.text.isBlank()) {
+//                                errorMessage = "Key is required"
+//                            }
+//
+//                            if (acceptedTerms.value && key.value.text.isNotBlank()) {
+//                                try {
+//                                    accountViewModel.login(key.value.text)
+//                                } catch (e: Exception) {
+//                                    errorMessage = "Invalid key"
+//                                }
+//                            }
 
-                            if (key.value.text.isBlank()) {
-                                errorMessage = "Key is required"
-                            }
-
-                            if (acceptedTerms.value && key.value.text.isNotBlank()) {
-                                try {
-                                    accountViewModel.login(key.value.text)
-                                } catch (e: Exception) {
-                                    errorMessage = "Invalid key"
-                                }
-                            }
+                            Log.d(TAG, "DidLoginScreen: 了解更多")
                         },
                         shape = RoundedCornerShape(35.dp),
                         modifier = Modifier

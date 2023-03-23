@@ -3,17 +3,11 @@ package com.vitorpamplona.amethyst
 import android.content.Context
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.vitorpamplona.amethyst.did.DIDPersona
 import com.vitorpamplona.amethyst.model.Account
-import com.vitorpamplona.amethyst.model.Channel
-import com.vitorpamplona.amethyst.model.DefaultChannels
-import com.vitorpamplona.amethyst.model.User
 import com.vitorpamplona.amethyst.model.toByteArray
 import com.vitorpamplona.amethyst.ui.actions.NewRelayListViewModel
-import com.vitorpamplona.amethyst.ui.navigation.Route
 import java.util.Locale
-import nostr.postr.Persona
-import nostr.postr.events.ContactListEvent
-import nostr.postr.events.Event
 import nostr.postr.toHex
 
 class LocalPreferences(context: Context) {
@@ -34,8 +28,8 @@ class LocalPreferences(context: Context) {
 
   fun saveToEncryptedStorage(account: Account) {
     encryptedPreferences.edit().apply {
-      account.loggedIn.privKey?.let { putString("nostr_privkey", it.toHex()) }
-      account.loggedIn.pubKey.let { putString("nostr_pubkey", it.toHex()) }
+//      account.loggedIn.privKey?.let { putString("nostr_privkey", it.toHex()) }
+      account.loggedIn.pubKey.let { putString("did_string", it.toHex()) }
       account.followingChannels.let { putStringSet("following_channels", it) }
       account.hiddenUsers.let { putStringSet("hidden_users", it) }
       account.localRelays.let { putString("relays", gson.toJson(it)) }
@@ -46,8 +40,9 @@ class LocalPreferences(context: Context) {
 
   fun loadFromEncryptedStorage(): Account? {
     encryptedPreferences.apply {
-      val privKey = getString("nostr_privkey", null)
-      val pubKey = getString("nostr_pubkey", null)
+//      val privKey = getString("nostr_privkey", null)
+//      val pubKey = getString("nostr_pubkey", null)
+      val pubKey = getString("did_string", null)
       val followingChannels = getStringSet("following_channels", null) ?: setOf()
       val hiddenUsers = getStringSet("hidden_users", emptySet()) ?: setOf()
       val localRelays = gson.fromJson(
@@ -60,7 +55,7 @@ class LocalPreferences(context: Context) {
 
       if (pubKey != null) {
         return Account(
-          Persona(privKey = privKey?.toByteArray(), pubKey = pubKey.toByteArray()),
+          DIDPersona(pubKey = pubKey.toByteArray()),
           followingChannels,
           hiddenUsers,
           localRelays,
