@@ -47,12 +47,13 @@ public class DIDHelper {
     private void initRootIdentity(){
         try{
             File storefile = Environment.getExternalStorageDirectory();
-            Log.d("wangran", "initRootIdentity: storefile====>"+storefile);
+            Log.d("wangran", "initRootIdentity: storefile0000AAA====>"+storefile);
             File storePath = new File(storefile.getAbsolutePath(), "newDir2");
             storePath.mkdirs();
 
-            Log.d("wangran", "initRootIdentity: storePath====>"+storePath);
+            Log.d("wangran", "initRootIdentity: storePath1111AAA====>"+storePath);
             store = DIDStore.open(storePath);
+            Log.d("wangran", "aaaaaaaaaaaaaa");
             if (store.containsRootIdentities())
                 return; // Already exists
             Mnemonic mg = Mnemonic.getInstance();
@@ -104,22 +105,25 @@ public class DIDHelper {
         return doc;
     }
 
-    public void restore(String mnemonic) throws DIDException {
+    public String restore(String mnemonic) throws DIDException {
         initDIDBakckend();
-        restore(mnemonic, passphrase);
+        return restore(mnemonic, passphrase);
     }
-    public void restore(String mnemonic, String passphrase) throws DIDException {
+    public String restore(String mnemonic, String passphrase) throws DIDException {
         File storefile = Environment.getExternalStorageDirectory();
-        Log.d("wangran", "initRootIdentity: storefile====>"+storefile);
+        Log.d("wangran", "initRootIdentity: storefile1111====>"+storefile);
+        Log.d("wangran", "------------------");
         File storePath = new File(storefile.getAbsolutePath(), "newDir2");
-
+        Log.d("wangran", "000000000000");
         deleteFile(storePath);
-
+        Log.d("wangran", "1111111111");
         DIDStore store = DIDStore.open(storePath);
+        Log.d("wangran", "2222222222222222");
 
         RootIdentity id = RootIdentity.create(mnemonic, passphrase, store, storepass);
+        Log.d("wangran", "333333333333333");
         id.synchronize();
-
+        Log.d("wangran", "44444444444444");
         List<DID> dids = store.listDids();
         Log.d(TAG, dids.size() + " DIDs restored.");
         Log.d(TAG, dids.get(0).toString() + " dids.get(0).toString()");
@@ -131,6 +135,8 @@ public class DIDHelper {
         } else {
             Log.d(TAG, "No dids restored.");
         }
+
+        return dids.get(0).toString();
     }
 
     private static void deleteFile(File file) {

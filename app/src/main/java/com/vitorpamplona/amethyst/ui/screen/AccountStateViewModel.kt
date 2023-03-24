@@ -1,5 +1,6 @@
 package com.vitorpamplona.amethyst.ui.screen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vitorpamplona.amethyst.LocalPreferences
@@ -40,6 +41,8 @@ class AccountStateViewModel(private val localPreferences: LocalPreferences): Vie
 //      } else {
 //        Account(Persona(Hex.decode(key)))
 //      }
+
+    Log.d("wangran", "login: "+key)
     val account = Account(DIDPersona(pubKey = key.toByteArray()))
 
     localPreferences.saveToEncryptedStorage(account)

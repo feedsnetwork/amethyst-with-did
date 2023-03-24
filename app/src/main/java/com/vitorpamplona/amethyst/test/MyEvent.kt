@@ -35,22 +35,24 @@ class MyEvent(
         const val kind = 1
 
         fun create(msg: String, replyTos: List<String>?, mentions: List<String>?,didTags: List<String>?, privateKey: ByteArray, createdAt: Long = Date().time / 1000): MyEvent {
-            val pubKey = Utils.pubkeyCreate(privateKey)
+//            val pubkey = privateKey
+//            val pubKey = Utils.pubkeyCreate(privateKey)
 //            val pubKeyStr = "ioUyXVxTkZmJYGa5sWUzAfb8khDQc5zKT3"
-            Log.d("wangran", "create: privateKey"+privateKey);
-            Log.d("wangran", "create: privateKey toHex"+privateKey.toHex());
 
-            val pubkey0 = Secp256k1.get().pubKeyCompress(Secp256k1.get().pubkeyCreate(privateKey));
-            Log.d("wangran", "create: pubkey0"+pubkey0);
-            Log.d("wangran", "create: pubkey0 toHex "+pubkey0.toHex());
-
-            val pubKey00 = pubKeyCompress(pubkey0)
-            Log.d("wangran", "create: pubKey00"+pubKey00);
-            Log.d("wangran", "create: pubKey00 toHex "+pubKey00.toHex());
-
-            val pubKey000 = pubKeyCompress(pubkey0).copyOfRange(1, 33)
-            Log.d("wangran", "create: pubKey000"+pubKey000);
-            Log.d("wangran", "create: pubKey000 toHex "+pubKey000.toHex());
+//            Log.d("wangran", "create: privateKey"+privateKey);
+//            Log.d("wangran", "create: privateKey toHex"+privateKey.toHex());
+//
+//            val pubkey0 = Secp256k1.get().pubKeyCompress(Secp256k1.get().pubkeyCreate(privateKey));
+//            Log.d("wangran", "create: pubkey0"+pubkey0);
+//            Log.d("wangran", "create: pubkey0 toHex "+pubkey0.toHex());
+//
+//            val pubKey00 = pubKeyCompress(pubkey0)
+//            Log.d("wangran", "create: pubKey00"+pubKey00);
+//            Log.d("wangran", "create: pubKey00 toHex "+pubKey00.toHex());
+//
+//            val pubKey000 = pubKeyCompress(pubkey0).copyOfRange(1, 33)
+//            Log.d("wangran", "create: pubKey000"+pubKey000);
+//            Log.d("wangran", "create: pubKey000 toHex "+pubKey000.toHex());
 
 //            val did = "did:elastos:inn8mJh5kaduEdiqa9E9UP7FK2Cv72AbJd"
 //            thread {
@@ -104,9 +106,7 @@ class MyEvent(
 //            val pubKeyBA = DIDHelper.getDefaultPublicKey(did);
 
 
-
-
-
+            val pubKey = privateKey
             Log.d("wangran", "pubKey: ====> "+pubKey);
             val tags = mutableListOf<List<String>>()
             replyTos?.forEach {
@@ -137,12 +137,13 @@ class MyEvent(
             Log.d("wangran", "create id: "+id);
             Log.d("wangran", "create id str: "+id.toString());
 
-            val sig = Utils.sign(id, privateKey)
+//            val sig = Utils.sign(id, privateKey)
 
-//            val sigStr = DIDHelper.signData(pubKey, id);
+            val didString = String(pubKey)
+            val sigStr = DIDHelper.signData(didString, id);
 
 //            Log.d("wangran", "create: sigStr = "+sigStr);
-//            val sig = sigStr.toByteArray();
+            val sig = sigStr.toByteArray();
 
             Log.d("wangran", "create: signResult = "+sig);
             Log.d("wangran", "create: signResult = "+sig.toString());

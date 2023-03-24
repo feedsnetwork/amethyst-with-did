@@ -27,6 +27,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,21 +43,29 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitorpamplona.amethyst.R
 import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.model.Channel
 import com.vitorpamplona.amethyst.ui.screen.AccountStateViewModel
+import com.vitorpamplona.amethyst.ui.screen.ScanQRCodeBox
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onClose: () -> Unit) {
+fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: Int, didString: String) -> Unit) {
+//    var cachedDID = ""
+    val cachedDID = MutableLiveData("")
+    var prepareRestore by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
+        restoreDIDViewModel.restore {
+            cachedDID.postValue(it)
+        }
     }
 
     Dialog(
-        onDismissRequest = { onClose() },
+        onDismissRequest = { onFinish(0,"") },
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
             dismissOnClickOutside = false
@@ -64,7 +73,6 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onClose: () -> Unit
     ) {
         Surface(
         ) {
-            var prepareRestore by remember { mutableStateOf(false) }
             if (prepareRestore) {
                 Column(modifier = Modifier
                     .padding(10.dp)
@@ -79,7 +87,8 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onClose: () -> Unit
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
-                            onClose()
+
+//                            onFinish(1, cachedDID.value)
 //                            if (isFinish) {
 //                                onClose()
 //                            }
@@ -101,7 +110,7 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onClose: () -> Unit
                 ) {
                     Column(modifier = Modifier.align(Alignment.End)) {
                         CloseButton(onCancel = {
-                            onClose()
+                            onFinish(0, "")
                         })
                     }
 
@@ -120,14 +129,19 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onClose: () -> Unit
 ////                            postViewModel.clear()
 //                            onClose()
 //                        })
-                        Log.d(TAG, "RestoreDIDView: "+restoreDIDViewModel.mnemonic)
-                        RestoreDIDButton(
-                            onConfirm = {
-                                restoreDIDViewModel.restore()
-                                prepareRestore = true
-                            },
-                            restoreDIDViewModel.mnemonic.isNotBlank()
-                        )
+
+                        val state = cachedDID.observeAsState()
+                        state.value?.let {
+                            Log.d(TAG, "RestoreDIDView: "+restoreDIDViewModel.mnemonic)
+                            RestoreDIDButton(
+                                onConfirm = {
+                                    onFinish(1, it)
+//                                prepareRestore = true
+                                },
+                                it.isNotBlank()
+//                            cachedDID.isNotBlank()
+                            )
+                        }
                     }
                 }
             }
@@ -150,6 +164,6 @@ fun RestoreDIDButton(onConfirm: () -> Unit = {}, isActive: Boolean, modifier: Mo
                 backgroundColor = if (isActive) MaterialTheme.colors.primary else Color.Gray
             )
     ) {
-        Text(text = "Create", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+        Text(text = "Done", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
     }
 }

@@ -53,7 +53,6 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
     var errorMessage by remember { mutableStateOf("") }
     val acceptedTerms = remember { mutableStateOf(false) }
     var termsAcceptanceIsRequired by remember { mutableStateOf("") }
-//    var mnemonic = ""
     val uri = LocalUriHandler.current
     lateinit var barcodeView: DecoratedBarcodeView
     val text = MutableLiveData("")
@@ -75,22 +74,16 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
     }
 
     if (wantNewDID){
-//        NewDIDView(onFinish = {type, did ->
+//        NewDIDView(onFinish = {type, didString ->
 //            run {
 //                if (type == 0) {
 //                    wantNewDID = false
 //                } else {
-//                    cachedDID = did
+//                    cachedDID = didString
 //                    entryMainScreen = true
 //                }
 //            }
 //        })
-
-        //TEST
-//        val test = "did:elastos:iWkzDzneEHFPXJ7ho2998uv1YX3Aewj58S"
-//        val testByteArray = test.toByteArray()
-//        val result = testByteArray.toHex()
-//        Log.d(TAG, "result: $result")
 
         cachedDID = "did:elastos:iWkzDzneEHFPXJ7ho2998uv1YX3Aewj58S"
         entryMainScreen = true
@@ -98,7 +91,17 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
 
 
     if (restoreDID)
-        RestoreDIDView (restoreDIDViewModel, { restoreDID = false })
+        RestoreDIDView (restoreDIDViewModel, onFinish = {type,didString ->
+            run {
+                Log.d(TAG, "DidLoginScreen: RestoreDIDView result = "+type+didString)
+                if (type == 0) {
+                    restoreDID = false
+                } else {
+                    cachedDID = didString
+                    entryMainScreen = true
+                }
+            }
+        })
 
 
     if(entryMainScreen){
@@ -299,9 +302,6 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
 //            )
 //        )
         }
-    }
-    fun initBarcodeView(){
-
     }
 }
 

@@ -51,7 +51,7 @@ import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun NewDIDView(onFinish: (type: Int, did: String) -> Unit) {
+fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
     //type 0 cancel, 1 finish
     val newDIDViewModel: NewDIDViewModel = viewModel()
 

@@ -12,17 +12,19 @@ import kotlinx.coroutines.launch
 
 class RestoreDIDViewModel: ViewModel() {
     var mnemonic = ""
-    fun restore() {
+//    fun restore(onSuccess: (didString: String) -> Unit) {
+    fun restore(onSuccess: (didString: String) -> Unit) {
         Log.d(TAG, "restore: mnemonic"+mnemonic)
         val scope = CoroutineScope(Job() + Dispatchers.IO)
         scope.launch {
             try {
                 delay(100)
                 val didHelper = DIDHelper()
-                didHelper.restore(mnemonic)
+                val didString = didHelper.restore(mnemonic)
                 Log.d(TAG, "Restore: ...")
+                onSuccess(didString)
             }catch (e: Exception){
-                Log.d(TAG, "create error : ..."+e.toString())
+                Log.d(TAG, "restore error : ..."+e.toString())
             }
         }
 
