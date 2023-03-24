@@ -55,9 +55,7 @@ import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: Int, didString: String) -> Unit) {
-//    var cachedDID = ""
     val cachedDID = MutableLiveData("")
-    var prepareRestore by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         restoreDIDViewModel.restore {
             cachedDID.postValue(it)
@@ -73,35 +71,35 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: In
     ) {
         Surface(
         ) {
-            if (prepareRestore) {
-                Column(modifier = Modifier
-                    .padding(10.dp)
-                    .height(350.dp)
-                    .fillMaxWidth()
-                ) {
-//                    Column(modifier = Modifier.align(Alignment.End)) {
-//                        Text(text = "waitting...")
+//            if (prepareRestore) {
+//                Column(modifier = Modifier
+//                    .padding(10.dp)
+//                    .height(350.dp)
+//                    .fillMaxWidth()
+//                ) {
+////                    Column(modifier = Modifier.align(Alignment.End)) {
+////                        Text(text = "waitting...")
+////                    }
+//                    Text(text = "waitting...")
+//                    Text(text = "waitting...")
+//                    Button(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        onClick = {
+//
+////                            onFinish(1, cachedDID.value)
+////                            if (isFinish) {
+////                                onClose()
+////                            }
+//                        },
+//                        colors = ButtonDefaults
+//                            .buttonColors(
+//                                backgroundColor = MaterialTheme.colors.primary
+//                            )
+//                    ) {
+//                        Text(text = "Done", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
 //                    }
-                    Text(text = "waitting...")
-                    Text(text = "waitting...")
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-
-//                            onFinish(1, cachedDID.value)
-//                            if (isFinish) {
-//                                onClose()
-//                            }
-                        },
-                        colors = ButtonDefaults
-                            .buttonColors(
-                                backgroundColor = MaterialTheme.colors.primary
-                            )
-                    ) {
-                        Text(text = "Done", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
-                    }
-                }
-            }else {
+//                }
+//            }else {
                 Column(
                     modifier = Modifier
                         .padding(10.dp)
@@ -139,12 +137,11 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: In
 //                                prepareRestore = true
                                 },
                                 it.isNotBlank()
-//                            cachedDID.isNotBlank()
                             )
                         }
                     }
                 }
-            }
+//            }
         }
     }
 }

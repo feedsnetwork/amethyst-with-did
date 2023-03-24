@@ -38,6 +38,7 @@ import com.vitorpamplona.amethyst.buttons.NewNoteButton
 import com.vitorpamplona.amethyst.ui.MainActivity
 import com.vitorpamplona.amethyst.ui.actions.CloseButton
 import com.vitorpamplona.amethyst.ui.actions.NewDIDView
+import com.vitorpamplona.amethyst.ui.actions.RestoreDIDButton
 import com.vitorpamplona.amethyst.ui.actions.RestoreDIDView
 import com.vitorpamplona.amethyst.ui.actions.RestoreDIDViewModel
 import com.vitorpamplona.amethyst.ui.qrcode.DIDQrCodeScanner
@@ -47,7 +48,6 @@ import nostr.postr.toHex
 @Composable
 fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: LayoutInflater, intent: Intent, startingPage: String?) {
     val restoreDIDViewModel: RestoreDIDViewModel = viewModel()
-    var cachedDID = "";
     val TAG = "wangran"
     val key = remember { mutableStateOf(TextFieldValue("")) }
     var errorMessage by remember { mutableStateOf("") }
@@ -65,28 +65,25 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
     var showScanner by remember {
         mutableStateOf(false)
     }
-    var entryMainScreen by remember {
-        mutableStateOf(false)
-    }
+//    var entryMainScreen by remember {
+//        mutableStateOf(false)
+//    }
 
     var restoreDID by remember {
         mutableStateOf(false)
     }
 
     if (wantNewDID){
-//        NewDIDView(onFinish = {type, didString ->
-//            run {
-//                if (type == 0) {
-//                    wantNewDID = false
-//                } else {
-//                    cachedDID = didString
-//                    entryMainScreen = true
-//                }
-//            }
-//        })
+        NewDIDView(onFinish = {type, didString ->
+            run {
+                if (type == 1) {
+                    accountViewModel.login(didString)
+                    hideAll = true
+                }
 
-        cachedDID = "did:elastos:iWkzDzneEHFPXJ7ho2998uv1YX3Aewj58S"
-        entryMainScreen = true
+                wantNewDID = false
+            }
+        })
     }
 
 
@@ -94,54 +91,62 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
         RestoreDIDView (restoreDIDViewModel, onFinish = {type,didString ->
             run {
                 Log.d(TAG, "DidLoginScreen: RestoreDIDView result = "+type+didString)
-                if (type == 0) {
-                    restoreDID = false
-                } else {
-                    cachedDID = didString
-                    entryMainScreen = true
+                if (type == 1) {
+                    Log.d(TAG, "DidLoginScreen: bbbbbbbbbbbbbbbbb")
+                    accountViewModel.login(didString)
+                    hideAll = true
                 }
+                restoreDID = false
             }
         })
 
 
-    if(entryMainScreen){
-        Log.d(TAG, "DidLoginScreen0000: "+entryMainScreen)
-//        AccountScreen(accountViewModel, startingPage)
-        Log.d(TAG, "DidLoginScreen1111: "+cachedDID)
-        accountViewModel.login(cachedDID)
-        wantNewDID = false
-        entryMainScreen = false
-        Log.d(TAG, "DidLoginScreen2222: "+entryMainScreen)
-        hideAll = true
+//    if(entryMainScreen){
+//        Log.d(TAG, "DidLoginScreen0000: "+entryMainScreen)
+////        AccountScreen(accountViewModel, startingPage)
+//        Log.d(TAG, "DidLoginScreen1111: "+cachedDID.value)
 //
-//        val accountState by accountViewModel.accountContent.collectAsState()
+////        val state = cachedDID.observeAsState()
+////        Log.d(TAG, "DidLoginScreen222222: "+state.value)
+////        state.value?.let {
+////            Log.d(TAG, "DidLoginScreen333333333: "+cachedDID.value)
+////            accountViewModel.login(it)
+////        }
 //
-//        Crossfade(targetState = accountState, animationSpec = tween(durationMillis = 100),
-//            label = ""
-//        ) { state ->
-//            when (state) {
-//                is AccountState.LoggedOff -> {
-//                    entryMainScreen = false
-//                    hideAll = true
-//                    DidLoginScreen(accountViewModel, layoutInflater, intent, startingPage)
 //
-//                }
-//                is AccountState.LoggedIn -> {
-//                    entryMainScreen = false
-//                    hideAll = true
-//                    MainScreen(AccountViewModel(state.account), accountViewModel, startingPage)
+//        wantNewDID = false
+//        entryMainScreen = false
+//        Log.d(TAG, "DidLoginScreen4444444: "+entryMainScreen)
+//        hideAll = true
+////
+////        val accountState by accountViewModel.accountContent.collectAsState()
+////
+////        Crossfade(targetState = accountState, animationSpec = tween(durationMillis = 100),
+////            label = ""
+////        ) { state ->
+////            when (state) {
+////                is AccountState.LoggedOff -> {
+////                    entryMainScreen = false
+////                    hideAll = true
+////                    DidLoginScreen(accountViewModel, layoutInflater, intent, startingPage)
+////
+////                }
+////                is AccountState.LoggedIn -> {
+////                    entryMainScreen = false
+////                    hideAll = true
+////                    MainScreen(AccountViewModel(state.account), accountViewModel, startingPage)
+////
+////                }
+////                is AccountState.LoggedInViewOnly -> {
+////                    entryMainScreen = false
+////                    hideAll = true
+////                    MainScreen(AccountViewModel(state.account), accountViewModel, startingPage)
+////
+////                }
+////            }
+////        }
 //
-//                }
-//                is AccountState.LoggedInViewOnly -> {
-//                    entryMainScreen = false
-//                    hideAll = true
-//                    MainScreen(AccountViewModel(state.account), accountViewModel, startingPage)
-//
-//                }
-//            }
-//        }
-
-    }
+//    }
     if (showScanner){
         val barcodeLayoutView = layoutInflater.inflate(R.layout.layout, null)
         barcodeView = barcodeLayoutView.findViewById(R.id.barcode_scanner)
@@ -174,7 +179,7 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
                     Log.d(TAG, "DidLoginScreen: "+restoreDIDViewModel.mnemonic)
                 })
         }
-    }else if (!entryMainScreen&& !hideAll){
+    }else if (!hideAll){
         Column(
             modifier = Modifier
                 .fillMaxSize()
