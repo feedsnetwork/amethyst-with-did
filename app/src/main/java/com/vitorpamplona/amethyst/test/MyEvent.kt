@@ -202,10 +202,12 @@ class MyEvent(
             Log.d("wangran", "create id str: "+String(id))
 
 //            val sig = Utils.sign(id, privateKey)
-
-            val sigStr = DIDHelper.signData(id);
+            val hexid = id.toHex().toByteArray(Charsets.UTF_8)
+            val sigStr = DIDHelper.signData(hexid);
 
             Log.d("wangran", "create: sigStr = "+sigStr)
+
+            DIDHelper.verify(sigStr, id)
 //            val sig = sigStr.toByteArray(Charsets.UTF_8)
 
 //            Log.d("wangran", "create: signResult = "+sig)
@@ -228,5 +230,5 @@ fun MyEvent.generateId(): ByteArray {
         content
     )
     val rawEventJson = Event.gson.toJson(rawEvent)
-    return Event.sha256.digest(rawEventJson.toByteArray())
+    return Event.sha256.digest(rawEventJson.toByteArray(Charsets.UTF_8))
 }

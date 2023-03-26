@@ -15,6 +15,7 @@ import org.elastos.did.exception.DIDStoreException;
 import org.elastos.did.exception.MnemonicException;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 public class DIDHelper {
@@ -166,7 +167,7 @@ public class DIDHelper {
         }
     }
 
-    public static String signData(byte[]... data){
+    public static String signData(byte[] data){
         String result = "";
         try{
             if (currentDIDDocument == null){
@@ -174,12 +175,31 @@ public class DIDHelper {
             }else{
                 Log.d(TAG, "signData: 2222 not null");
             }
+            Log.d(TAG, "signData: did is "+currentDIDDocument.getSubject());
+            Log.d(TAG, "signData: id is "+new String(data));
+
             result = currentDIDDocument.sign(storepass,data);
+
+            Log.d(TAG, "signData: sign result is "+result);
         } catch (DIDStoreException e) {
             throw new RuntimeException(e);
         }
 
         return result;
+    }
+
+
+    public static void verify(String sig, byte[] data){
+        if (currentDIDDocument == null){
+            Log.d(TAG, "signData: 11111 null");
+        }else{
+            Log.d(TAG, "signData: 2222 not null");
+        }
+        Log.d(TAG, "signData: did is "+currentDIDDocument.getSubject());
+        Log.d(TAG, "signData: id is "+new String(data));
+
+        boolean isVerify = currentDIDDocument.verify(sig, data);
+        Log.d(TAG, "verify: isVerify "+isVerify);
     }
 
     private static DID getDid(String didStr){
