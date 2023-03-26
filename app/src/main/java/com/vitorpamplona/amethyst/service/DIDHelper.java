@@ -24,7 +24,7 @@ public class DIDHelper {
 
     private static String passphrase = "";
     private static String storepass = "mypassword";
-    private static String storePath = "/storage/self/primary/tmp/";
+    private static String childStorePath = "did";
     private static DIDStore store;
 
     private static DIDDocument currentDIDDocument;
@@ -50,8 +50,9 @@ public class DIDHelper {
     private void initRootIdentity(){
         try{
             File storefile = Environment.getExternalStorageDirectory();
+//            File storefile = Environment.getExternalStorageDirectory();
             Log.d("wangran", "initRootIdentity: storefile0000AAA====>"+storefile);
-            File storePath = new File(storefile.getAbsolutePath(), "newDir2");
+            File storePath = new File(storefile.getAbsolutePath(), DIDHelper.childStorePath);
             storePath.mkdirs();
 
             Log.d("wangran", "initRootIdentity: storePath1111AAA====>"+storePath);
@@ -116,7 +117,7 @@ public class DIDHelper {
         File storefile = Environment.getExternalStorageDirectory();
         Log.d("wangran", "initRootIdentity: storefile1111====>"+storefile);
         Log.d("wangran", "------------------");
-        File storePath = new File(storefile.getAbsolutePath(), "newDir2");
+        File storePath = new File(storefile.getAbsolutePath(), DIDHelper.childStorePath);
         Log.d("wangran", "000000000000");
         deleteFile(storePath);
         Log.d("wangran", "1111111111");
@@ -156,7 +157,7 @@ public class DIDHelper {
     public static void loadDIDStore(String didString){
         try {
             File storefile = Environment.getExternalStorageDirectory();
-            File storePath = new File(storefile.getAbsolutePath(), "newDir2");
+            File storePath = new File(storefile.getAbsolutePath(), DIDHelper.childStorePath);
             DIDStore didStore = DIDStore.open(storePath);
             currentDIDDocument = didStore.loadDid(didString);
 
