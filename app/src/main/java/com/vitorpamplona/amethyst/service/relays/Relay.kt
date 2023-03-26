@@ -2,6 +2,7 @@ package com.vitorpamplona.amethyst.service.relays
 
 import android.util.Log
 import com.google.gson.JsonElement
+import com.vitorpamplona.amethyst.test.MyEvent
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import nostr.postr.events.Event
@@ -206,6 +207,17 @@ class Relay(
             Log.d(TAG, "send: "+"xxx")
         }
     }
+
+    fun send(signedEvent: MyEvent) {
+        if (write) {
+            Log.d(TAG, "send: "+"""["EVENT",${signedEvent.toJson()}]""")
+            socket?.send("""["EVENT",${signedEvent.toJson()}]""")
+            eventUploadCounter++
+        }else{
+            Log.d(TAG, "send: "+"xxx")
+        }
+    }
+
 
     fun close(subscriptionId: String){
         Log.d(TAG, "close: "+"""["CLOSE","$subscriptionId"]""")

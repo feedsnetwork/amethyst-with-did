@@ -1,30 +1,50 @@
 package com.vitorpamplona.amethyst.test
 
 import android.util.Log
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
+import com.google.gson.annotations.SerializedName
 import com.vitorpamplona.amethyst.model.toByteArray
 import com.vitorpamplona.amethyst.service.DIDHelper
 import fr.acinq.secp256k1.Secp256k1
 import fr.acinq.secp256k1.Secp256k1Exception
 import nostr.postr.Utils
+import nostr.postr.events.ContactListEvent
+import nostr.postr.events.DeletionEvent
 import nostr.postr.events.Event
+import nostr.postr.events.MetadataEvent
+import nostr.postr.events.PrivateDmEvent
+import nostr.postr.events.RecommendRelayEvent
+import nostr.postr.events.TextNoteEvent
 import nostr.postr.events.generateId
 import nostr.postr.toHex
 import okio.ByteString.Companion.decodeBase64
 import org.elastos.did.DID
 import org.elastos.did.DIDDocument
 import java.lang.Exception
+import java.lang.reflect.Type
 import java.nio.charset.Charset
+import java.security.MessageDigest
 import java.util.*
 import kotlin.concurrent.thread
 
 class MyEvent(
-    id: ByteArray,
-    pubKey: ByteArray,
-    createdAt: Long,
-    tags: List<List<String>>,
-    content: String,
-    sig: ByteArray
-): Event(id, pubKey, createdAt, kind, tags, content, sig) {
+    val id: ByteArray,
+    @SerializedName("pubkey") val pubKey: ByteArray,
+    @SerializedName("created_at") val createdAt: Long,
+    val kind: Int,
+    val tags: List<List<String>>,
+    val content: String,
+    val sig: String
+) {
     @Transient val replyTos: List<String>
     @Transient val mentions: List<String>
 
@@ -32,94 +52,136 @@ class MyEvent(
         replyTos = tags.filter { it.firstOrNull() == "e" }.mapNotNull { it.getOrNull(1) }
         mentions = tags.filter { it.firstOrNull() == "p" }.mapNotNull { it.getOrNull(1) }
     }
+    fun toJson(): String = gson.toJson(this)
+
+//    /**
+//     * Checks if the ID is correct and then if the pubKey's secret key signed the event.
+//     */
+//    fun checkSignature() {
+//        if (!id.contentEquals(generateId())) {
+//            throw Exception(
+//                """|Unexpected ID.
+//                   |  Event: ${toJson()}
+//                   |  Actual ID: ${id.toHex()}
+//                   |  Generated: ${generateId().toHex()}""".trimIndent()
+//            )
+//        }
+//        if (!secp256k1.verifySchnorr(sig, id, pubKey)) {
+//            throw Exception("""Bad signature!""")
+//        }
+//    }
+
+    class EventDeserializer : JsonDeserializer<MyEvent> {
+        override fun deserialize(
+            json: JsonElement,
+            typeOfT: Type?,
+            context: JsonDeserializationContext?
+        ): MyEvent {
+            val jsonObject = json.asJsonObject
+            return MyEvent(
+                id = Hex.decode(jsonObject.get("id").asString),
+                pubKey = Hex.decode(jsonObject.get("pubkey").asString),
+                createdAt = jsonObject.get("created_at").asLong,
+                kind = jsonObject.get("kind").asInt,
+                tags = jsonObject.get("tags").asJsonArray.map {
+                    it.asJsonArray.map { s -> s.asString }
+                },
+                content = jsonObject.get("content").asString,
+                sig = jsonObject.get("sig").asString
+            )
+        }
+    }
+
+    class EventSerializer : JsonSerializer<MyEvent> {
+        override fun serialize(
+            src: MyEvent,
+            typeOfSrc: Type?,
+            context: JsonSerializationContext?
+        ): JsonElement {
+            return JsonObject().apply {
+                addProperty("id", src.id.toHex())
+                addProperty("pubkey", src.pubKey.toHex())
+                addProperty("created_at", src.createdAt)
+                addProperty("kind", src.kind)
+                add("tags", JsonArray().also { jsonTags ->
+                    src.tags.forEach { tag ->
+                        jsonTags.add(JsonArray().also { jsonTagElement ->
+                            tag.forEach { tagElement ->
+                                jsonTagElement.add(tagElement)
+                            }
+                        })
+                    }
+                })
+                addProperty("content", src.content)
+                addProperty("sig", src.sig)
+            }
+        }
+    }
+
+    class ByteArrayDeserializer : JsonDeserializer<ByteArray> {
+        override fun deserialize(
+            json: JsonElement,
+            typeOfT: Type?,
+            context: JsonDeserializationContext?
+        ): ByteArray = Hex.decode(json.asString)
+    }
+
+    class ByteArraySerializer : JsonSerializer<ByteArray> {
+        override fun serialize(
+            src: ByteArray,
+            typeOfSrc: Type?,
+            context: JsonSerializationContext?
+        ) = JsonPrimitive(src.toHex())
+    }
 
     companion object {
-        const val kind = 1
+        private val secp256k1 = Secp256k1.get()
 
-        fun create(msg: String, replyTos: List<String>?, mentions: List<String>?,didTags: List<String>?, privateKey: ByteArray, createdAt: Long = Date().time / 1000): MyEvent {
-//            val pubkey = privateKey
-//            val pubKey = Utils.pubkeyCreate(privateKey)
-//            val pubKeyStr = "ioUyXVxTkZmJYGa5sWUzAfb8khDQc5zKT3"
+        val sha256: MessageDigest = MessageDigest.getInstance("SHA-256")
+        val gson: Gson = GsonBuilder()
+            .disableHtmlEscaping()
+            .registerTypeAdapter(MyEvent::class.java, EventSerializer())
+            .registerTypeAdapter(MyEvent::class.java, EventDeserializer())
+            .registerTypeAdapter(ByteArray::class.java, ByteArraySerializer())
+            .registerTypeAdapter(ByteArray::class.java, ByteArrayDeserializer())
+            .create()
 
-//            Log.d("wangran", "create: privateKey"+privateKey);
-//            Log.d("wangran", "create: privateKey toHex"+privateKey.toHex());
+//        fun fromJson(json: String, lenient: Boolean = false): MyEvent = gson.fromJson(json, MyEvent::class.java).getRefinedEvent(lenient)
 //
-//            val pubkey0 = Secp256k1.get().pubKeyCompress(Secp256k1.get().pubkeyCreate(privateKey));
-//            Log.d("wangran", "create: pubkey0"+pubkey0);
-//            Log.d("wangran", "create: pubkey0 toHex "+pubkey0.toHex());
+//        fun fromJson(json: JsonElement, lenient: Boolean = false): MyEvent = gson.fromJson(json, MyEvent::class.java).getRefinedEvent(lenient)
 //
-//            val pubKey00 = pubKeyCompress(pubkey0)
-//            Log.d("wangran", "create: pubKey00"+pubKey00);
-//            Log.d("wangran", "create: pubKey00 toHex "+pubKey00.toHex());
-//
-//            val pubKey000 = pubKeyCompress(pubkey0).copyOfRange(1, 33)
-//            Log.d("wangran", "create: pubKey000"+pubKey000);
-//            Log.d("wangran", "create: pubKey000 toHex "+pubKey000.toHex());
+//        fun MyEvent.getRefinedEvent(lenient: Boolean = false): MyEvent = when (kind) {
+//            MetadataEvent.kind -> MetadataEvent(id, pubKey, createdAt, tags, content, sig)
+//            TextNoteEvent.kind -> TextNoteEvent(id, pubKey, createdAt, tags, content, sig)
+//            RecommendRelayEvent.kind -> RecommendRelayEvent(id, pubKey, createdAt, tags, content, sig, lenient)
+//            ContactListEvent.kind -> ContactListEvent(id, pubKey, createdAt, tags, content, sig)
+//            PrivateDmEvent.kind -> PrivateDmEvent(id, pubKey, createdAt, tags, content, sig)
+//            DeletionEvent.kind -> DeletionEvent(id, pubKey, createdAt, tags, content, sig)
+//            6 -> this // content has full event. Resend/Retweet
+//            7 -> this // no content but e and p tags. Boosts
+//            17 -> this // nwiki. tag w->subject https://github.com/fiatjaf/nwiki
+//            30 -> this // jester https://jesterui.github.io/
+//            40 -> this // some market place?
+//            7357 -> this // events that contain only an e tag?
+//            else -> this
+//        }
 
-//            val did = "did:elastos:inn8mJh5kaduEdiqa9E9UP7FK2Cv72AbJd"
-//            thread {
+        fun generateId(pubKey: ByteArray, createdAt: Long, kind: Int, tags: List<List<String>>, content: String): ByteArray {
+            val rawEvent = listOf(
+                0,
+                pubKey.toHex(),
+                createdAt,
+                kind,
+                tags,
+                content
+            )
+            val rawEventJson = gson.toJson(rawEvent)
+            return sha256.digest(rawEventJson.toByteArray(Charsets.UTF_8))
+        }
 
-
-
-//            Log.d("wangran", "create: 11111111111")
-//            DIDHelper.initRootIdentity()
-//            Log.d("wangran", "create: 222222222")
-//            val diddocument = DIDHelper.initDid()
-//
-//            Log.d("wangran", "create: 33333333333")
-//            Log.d("wangran", "create:diddocument "+diddocument)
-//            Log.d("wangran", "create:defaultPublicKey "+diddocument.defaultPublicKey.publicKeyBase58)
-//            val pubKeyBA = diddocument.defaultPublicKey.publicKeyBytes
-//            Log.d("wangran", "create: pubKeyBA"+pubKeyBA.toHex())
-//            val pubKey = pubKeyCompress(pubKeyBA).copyOfRange(1, 33)
-//            Log.d("wangran", "create: pubKey"+pubKey.toHex())
-//
-//            val pubKey2 = pubKeyCompress(pubKeyBA)
-//            Log.d("wangran", "create: pubKey2"+pubKey2.toHex())
-
-
-//                val document = DIDHelper.getDidDocument(did)
-//
-//                Log.d("wangran", "document: ====> "+document);
-//
-//
-//                val defaultPubKey = DIDHelper.getDefaultPublicKey(did)
-//
-//                Log.d("wangran", "defaultPubKey: ====> "+defaultPubKey);
-
-//            }
-
-//            val pubKeyStr = "dPS7BwbNLNAEcoHVdGx4BYcosdN9JxTeH3KAyTrJ8RnA"
-//            val pubKey = org.elastos.did.crypto.Base58.decode(pubKeyStr)
-
-
-//            val pubKeyStr = DIDHelper.getDefaultPublicKey(did);
-//            Log.d("wangran", "pubKey: ====> "+pubKeyStr);
-//            val pubkeyBA = pubKeyStr.toByteArray();
-
-//            val pubKey = pubKeyCompress(pubkeyBA).copyOfRange(1, 33)
-
-//            val pubKey = pubKeyStr.toByteArray()
-
-//            Thread.sleep(10000);
-
-
-
-//            val pubKeyBA = DIDHelper.getDefaultPublicKey(did);
-
-
+        fun create(privateKey: ByteArray, kind: Int, tags: List<List<String>> = emptyList(), content: String = "", createdAt: Long = Date().time / 1000): MyEvent {
             val pubKey = privateKey
             Log.d("wangran", "pubKey: ====> "+pubKey);
-            val tags = mutableListOf<List<String>>()
-            replyTos?.forEach {
-                tags.add(listOf("e", it))
-            }
-            mentions?.forEach {
-                tags.add(listOf("p", it))
-            }
-            didTags?.forEach {
-                tags.add(listOf("did", it))
-            }
 
             val rawEvent = listOf(
                 0,
@@ -127,7 +189,7 @@ class MyEvent(
                 createdAt,
                 kind,
                 tags,
-                msg
+                content
             )
             val rawEventJson = gson.toJson(rawEvent)
             Log.d("wangran", "create rawEventJson : "+rawEventJson);
@@ -135,7 +197,7 @@ class MyEvent(
 //            val id = sha256.digest(rawEventJson.toByteArray())
 
 
-            val id = generateId(pubKey, createdAt, kind, tags, msg)
+            val id = generateId(pubKey, createdAt, kind, tags, content)
             Log.d("wangran", "create id: "+id);
             Log.d("wangran", "create id str: "+String(id))
 
@@ -144,28 +206,27 @@ class MyEvent(
             val sigStr = DIDHelper.signData(id);
 
             Log.d("wangran", "create: sigStr = "+sigStr)
-            val sig = sigStr.toByteArray(Charsets.UTF_8)
+//            val sig = sigStr.toByteArray(Charsets.UTF_8)
 
-            Log.d("wangran", "create: signResult = "+sig)
-            Log.d("wangran", "create: signResult = "+String(sig))
+//            Log.d("wangran", "create: signResult = "+sig)
+//            Log.d("wangran", "create: signResult = "+String(sig))
 
 
             Log.d("wangran", "create: "+"sig")
-            return MyEvent(id, pubKey, createdAt, tags, msg, sig)
-        }
-
-        fun pubKeyCompress(pubkey: ByteArray): ByteArray {
-            return when {
-                pubkey.size == 33 && (pubkey[0] == 2.toByte() || pubkey[0] == 3.toByte()) -> pubkey
-                pubkey.size == 65 && pubkey[0] == 4.toByte() -> {
-                    val compressed = pubkey.copyOf(33)
-                    compressed[0] = if (pubkey.last() % 2 == 0) 2.toByte() else 3.toByte()
-                    compressed
-                }
-                else -> throw Secp256k1Exception("invalid public key")
-            }
+            return MyEvent(id, pubKey, createdAt, kind, tags, content, sigStr)
         }
     }
+}
 
-
+fun MyEvent.generateId(): ByteArray {
+    val rawEvent = listOf(
+        0,
+        pubKey.toHex(),
+        createdAt,
+        kind,
+        tags,
+        content
+    )
+    val rawEventJson = Event.gson.toJson(rawEvent)
+    return Event.sha256.digest(rawEventJson.toByteArray())
 }

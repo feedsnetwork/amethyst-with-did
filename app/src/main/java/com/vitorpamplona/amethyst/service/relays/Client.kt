@@ -1,5 +1,6 @@
 package com.vitorpamplona.amethyst.service.relays
 
+import com.vitorpamplona.amethyst.test.MyEvent
 import java.util.UUID
 import nostr.postr.events.Event
 
@@ -47,6 +48,10 @@ object Client: RelayPool.Listener {
     }
 
     fun send(signedEvent: Event) {
+        RelayPool.send(signedEvent)
+    }
+
+    fun send(signedEvent: MyEvent) {
         RelayPool.send(signedEvent)
     }
 

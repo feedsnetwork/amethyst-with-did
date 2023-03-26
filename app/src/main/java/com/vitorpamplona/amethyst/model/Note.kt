@@ -16,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.vitorpamplona.amethyst.service.relays.Relay
+import com.vitorpamplona.amethyst.test.MyEvent
 import java.util.Date
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -61,6 +62,16 @@ class Note(val idHex: String) {
 
         live.invalidateData()
     }
+
+    fun loadEvent(event: MyEvent, author: User, mentions: List<User>, replyTo: List<Note>) {
+        this.event = Event(event.id, event.pubKey,event.createdAt, event.kind, event.tags, event.content,event.sig.toByteArray(Charsets.UTF_8))
+        this.author = author
+        this.mentions = mentions
+        this.replyTo = replyTo
+
+        live.invalidateData()
+    }
+
 
     fun formattedDateTime(timestamp: Long): String {
         return Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault())

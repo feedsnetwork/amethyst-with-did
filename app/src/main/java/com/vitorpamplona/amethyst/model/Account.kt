@@ -225,15 +225,14 @@ class Account(
     val mentionsHex = mentions?.map { it.pubkeyHex }
 
     Log.d("wangran", "message: ====>"+message);
-    val didTags = listOf<String>("test")
+    val didTags = listOf<String>("did")
 
     thread {
       val signedEvent = MyEvent.create(
-        msg = message,
-        replyTos = repliesToHex,
-        mentions = mentionsHex,
-        didTags = didTags,
-        privateKey = loggedIn.privKey!!
+        privateKey = loggedIn.privKey,
+        kind = 1,
+        tags = listOf(didTags),
+        content = message
       )
       Log.d("wangran", "sendPost: ====>"+signedEvent.toJson().toString());
       Client.send(signedEvent)

@@ -1,6 +1,7 @@
 package com.vitorpamplona.amethyst.service.relays
 
 import androidx.lifecycle.LiveData
+import com.vitorpamplona.amethyst.test.MyEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -55,6 +56,10 @@ object RelayPool: Relay.Listener {
     }
 
     fun send(signedEvent: Event) {
+        relays.forEach { it.send(signedEvent) }
+    }
+
+    fun send(signedEvent: MyEvent) {
         relays.forEach { it.send(signedEvent) }
     }
 
