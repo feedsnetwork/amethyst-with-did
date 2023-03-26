@@ -7,6 +7,7 @@ import com.vitorpamplona.amethyst.LocalPreferences
 import com.vitorpamplona.amethyst.ServiceManager
 import com.vitorpamplona.amethyst.did.DIDPersona
 import com.vitorpamplona.amethyst.model.Account
+import com.vitorpamplona.amethyst.service.DIDHelper
 import fr.acinq.secp256k1.Hex
 import java.util.regex.Pattern
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +47,7 @@ class AccountStateViewModel(private val localPreferences: LocalPreferences): Vie
     val account = Account(DIDPersona(pubKey = key.toByteArray()))
 
     localPreferences.saveToEncryptedStorage(account)
+    DIDHelper.loadDIDStore(String(account.loggedIn.pubKey))
 
     login(account)
   }
@@ -61,6 +63,8 @@ class AccountStateViewModel(private val localPreferences: LocalPreferences): Vie
       _accountContent.update { AccountState.LoggedIn ( account ) }
     else
       _accountContent.update { AccountState.LoggedInViewOnly ( account ) }
+
+    DIDHelper.loadDIDStore(String(account.loggedIn.pubKey))
 
     viewModelScope.launch(Dispatchers.IO) {
       ServiceManager.start(account)

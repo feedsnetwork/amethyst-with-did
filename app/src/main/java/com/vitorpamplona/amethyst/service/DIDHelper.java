@@ -26,6 +26,8 @@ public class DIDHelper {
     private static String storePath = "/storage/self/primary/tmp/";
     private static DIDStore store;
 
+    private static DIDDocument currentDIDDocument;
+
     public DIDDocument createNewDid() throws DIDException {
         //init DIDBakckend
         initDIDBakckend();
@@ -147,6 +149,37 @@ public class DIDHelper {
         }
 
         file.delete();
+    }
+
+
+    public static void loadDIDStore(String didString){
+        try {
+            File storefile = Environment.getExternalStorageDirectory();
+            File storePath = new File(storefile.getAbsolutePath(), "newDir2");
+            DIDStore didStore = DIDStore.open(storePath);
+            currentDIDDocument = didStore.loadDid(didString);
+
+            Log.d(TAG, "loadDIDStore: ====1111====="+currentDIDDocument.getSubject());
+        } catch (DIDStoreException e) {
+            Log.d(TAG, "loadDIDStore: ====22222222222222222====="+e.toString());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String signData(byte[]... data){
+        String result = "";
+        try{
+            if (currentDIDDocument == null){
+                Log.d(TAG, "signData: 11111 null");
+            }else{
+                Log.d(TAG, "signData: 2222 not null");
+            }
+            result = currentDIDDocument.sign(storepass,data);
+        } catch (DIDStoreException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
 
     private static DID getDid(String didStr){

@@ -7,10 +7,12 @@ import fr.acinq.secp256k1.Secp256k1
 import fr.acinq.secp256k1.Secp256k1Exception
 import nostr.postr.Utils
 import nostr.postr.events.Event
+import nostr.postr.events.generateId
 import nostr.postr.toHex
 import okio.ByteString.Companion.decodeBase64
 import org.elastos.did.DID
 import org.elastos.did.DIDDocument
+import java.lang.Exception
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.concurrent.thread
@@ -135,18 +137,17 @@ class MyEvent(
 
             val id = generateId(pubKey, createdAt, kind, tags, msg)
             Log.d("wangran", "create id: "+id);
-            Log.d("wangran", "create id str: "+id.toString());
+            Log.d("wangran", "create id str: "+String(id))
 
 //            val sig = Utils.sign(id, privateKey)
 
-            val didString = String(pubKey)
-            val sigStr = DIDHelper.signData(didString, id);
+            val sigStr = DIDHelper.signData(id);
 
-//            Log.d("wangran", "create: sigStr = "+sigStr);
-            val sig = sigStr.toByteArray();
+            Log.d("wangran", "create: sigStr = "+sigStr)
+            val sig = sigStr.toByteArray(Charsets.UTF_8)
 
-            Log.d("wangran", "create: signResult = "+sig);
-            Log.d("wangran", "create: signResult = "+sig.toString());
+            Log.d("wangran", "create: signResult = "+sig)
+            Log.d("wangran", "create: signResult = "+String(sig))
 
 
             Log.d("wangran", "create: "+"sig")

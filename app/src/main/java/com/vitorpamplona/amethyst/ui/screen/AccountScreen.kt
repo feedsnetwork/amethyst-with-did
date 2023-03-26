@@ -1,6 +1,7 @@
 package com.vitorpamplona.amethyst.ui.screen
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
@@ -20,12 +21,18 @@ fun AccountScreen(accountStateViewModel: AccountStateViewModel, layoutInflater: 
       when (state) {
         is AccountState.LoggedOff -> {
           DidLoginScreen(accountStateViewModel, layoutInflater, intent, startingPage)
+          Log.d("wangran", "AccountScreen: 111111111111111")
         }
         is AccountState.LoggedIn -> {
           MainScreen(AccountViewModel(state.account), accountStateViewModel, startingPage)
+          Log.d("wangran", "AccountScreen: 2222222222222222")
+          Log.d("wangran", "AccountScreen: state.account"+state.account.loggedIn.petName)
+          Log.d("wangran", "AccountScreen: state.account"+String(state.account.loggedIn.pubKey))
+          Log.d("wangran", "AccountScreen: state.account"+String(state.account.loggedIn.privKey))
         }
         is AccountState.LoggedInViewOnly -> {
           MainScreen(AccountViewModel(state.account), accountStateViewModel, startingPage)
+          Log.d("wangran", "AccountScreen: 333333333333"+state.account)
         }
       }
     }

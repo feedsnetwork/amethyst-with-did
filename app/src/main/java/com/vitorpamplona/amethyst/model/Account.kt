@@ -95,7 +95,7 @@ class Account(
     if (!isWriteable()) return
 
     loggedIn.privKey?.let {
-      val didString = String(it);
+//      val didString = String(it);
 
       val createdAt = Date().time / 1000
       val content = toString
@@ -103,7 +103,7 @@ class Account(
       val tags = listOf<List<String>>()
       val id = Event.generateId(pubKey, createdAt, MetadataEvent.kind, tags, content)
 //      val sig = Utils.sign(id, it)
-      val sig = DIDHelper.signData(didString,id)
+      val sig = DIDHelper.signData(id)
       val sigByteArray = sig.toByteArray()
 
       val event = MetadataEvent(id, pubKey, createdAt, tags, content, sigByteArray)
