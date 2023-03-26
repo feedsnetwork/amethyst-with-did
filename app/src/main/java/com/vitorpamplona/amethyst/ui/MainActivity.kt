@@ -103,6 +103,7 @@ class MainActivity : ComponentActivity() {
   override fun onResume() {
     super.onResume()
     requestPermission.launch(Manifest.permission.CAMERA)
+    requestPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
     ServiceManager.start()
   }
