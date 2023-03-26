@@ -1,5 +1,6 @@
 package com.vitorpamplona.amethyst.ui.note
 
+import android.util.Log
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +30,8 @@ fun UsernameDisplay(baseUser: User, weight: Modifier = Modifier) {
   val userState by baseUser.liveMetadata.observeAsState()
   val user = userState?.user ?: return
 
+  Log.d("wangran", "UsernameDisplay: user.bestUsername() "+user.bestUsername())
+  Log.d("wangran", "UsernameDisplay: user.bestDisplayName() "+user.bestDisplayName())
   if (user.bestUsername() != null || user.bestDisplayName() != null) {
     if (user.bestDisplayName().isNullOrBlank()) {
       Text(
@@ -53,7 +56,7 @@ fun UsernameDisplay(baseUser: User, weight: Modifier = Modifier) {
     }
   } else {
     Text(
-      user.pubkeyDisplayHex,
+      user.pubkeyDisplayDID,
       fontWeight = FontWeight.Bold,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,

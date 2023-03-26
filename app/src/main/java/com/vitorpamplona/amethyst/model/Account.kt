@@ -59,7 +59,8 @@ class Account(
   var translateTo: String = Locale.getDefault().language
 ) {
   fun userProfile(): User {
-    return LocalCache.getOrCreateUser(loggedIn.pubKey.toHexKey())
+//    return LocalCache.getOrCreateUser(loggedIn.pubKey.toHexKey())
+        return LocalCache.getOrCreateUser(loggedIn.pubKey.toHexKey())
   }
 
   fun followingChannels(): List<Channel> {

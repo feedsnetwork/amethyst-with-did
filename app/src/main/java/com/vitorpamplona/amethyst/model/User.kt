@@ -22,7 +22,8 @@ import nostr.postr.toNpub
 
 class User(val pubkeyHex: String) {
     val pubkey = Hex.decode(pubkeyHex)
-    val pubkeyDisplayHex = pubkey.toNpub().toShortenHex()
+//    val pubkeyDisplayHex = pubkey.toNpub().toShortenHex()
+    val pubkeyDisplayDID = String(Hex.decode(pubkeyHex)).toShortenHex()
 
     var info = UserMetadata()
 
@@ -57,8 +58,12 @@ class User(val pubkeyHex: String) {
     var latestMetadataRequestEOSE: Long? = null
     var latestReportRequestEOSE: Long? = null
 
+//    fun toBestDisplayName(): String {
+//        return bestDisplayName() ?: bestUsername() ?: pubkeyDisplayHex
+//    }
+
     fun toBestDisplayName(): String {
-        return bestDisplayName() ?: bestUsername() ?: pubkeyDisplayHex
+        return bestDisplayName() ?: bestUsername() ?: pubkeyDisplayDID
     }
 
     fun bestUsername(): String? {
