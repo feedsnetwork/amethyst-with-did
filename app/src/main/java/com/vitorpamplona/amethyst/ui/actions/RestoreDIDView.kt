@@ -73,61 +73,53 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: In
             dismissOnClickOutside = false
         )
     ) {
-        Surface(
-        ) {
+        Surface() {
+            Column(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(350.dp)
+                    .fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.align(Alignment.End)) {
+                    CloseButton(onCancel = {
+                        onFinish(0, "")
+                    })
+                }
+
+                Spacer(modifier = Modifier.height(100.dp))
                 Column(
                     modifier = Modifier
-                        .padding(10.dp)
-                        .height(350.dp)
-                        .fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.align(Alignment.End)) {
-                        CloseButton(onCancel = {
-                            onFinish(0, "")
-                        })
-                    }
-
-                    Spacer(modifier = Modifier.height(100.dp))
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                    ){
-                        val state = cachedDID.observeAsState()
-                        state.value?.let {
-                            if (it == ""){
-                                Text("Restoring")
-                            }else{
-                                Text("Restore Finish")
-                                Text("DID: $it")
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(30.dp))
-
-                    Column(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    ) {
-//                        CloseButton(onCancel = {
-////                            postViewModel.clear()
-//                            onClose()
-//                        })
-
-                        val state = cachedDID.observeAsState()
-                        state.value?.let {
-                            Log.d(TAG, "RestoreDIDView: "+restoreDIDViewModel.mnemonic)
-                            RestoreDIDButton(
-                                onConfirm = {
-                                    onFinish(1, it)
-                                    restoreFinish = true
-//                                prepareRestore = true
-                                },
-                                it.isNotBlank()
-                            )
+                        .fillMaxWidth(),
+                ){
+                    val state = cachedDID.observeAsState()
+                    state.value?.let {
+                        if (it == ""){
+                            Text("Restoring")
+                        }else{
+                            Text("Restore Finish")
+                            Text("DID: $it")
                         }
                     }
                 }
-//            }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Column(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    val state = cachedDID.observeAsState()
+                    state.value?.let {
+                        Log.d(TAG, "RestoreDIDView: "+restoreDIDViewModel.mnemonic)
+                        RestoreDIDButton(
+                            onConfirm = {
+                                onFinish(1, it)
+                                restoreFinish = true
+                            },
+                            it.isNotBlank()
+                        )
+                    }
+                }
+            }
         }
     }
 }

@@ -50,19 +50,18 @@ public class DIDHelper {
     private void initRootIdentity(){
         try{
             File storefile = Environment.getExternalStorageDirectory();
-//            File storefile = Environment.getExternalStorageDirectory();
             Log.d("wangran", "initRootIdentity: storefile0000AAA====>"+storefile);
             File storePath = new File(storefile.getAbsolutePath(), DIDHelper.childStorePath);
-//            deleteFile(storePath);
-
-            storePath.mkdirs();
-
+//            storePath.mkdirs();
             Log.d("wangran", "initRootIdentity: storePath1111AAA====>"+storePath);
             store = DIDStore.open(storePath);
             Log.d("wangran", "aaaaaaaaaaaaaa");
             if (store.containsRootIdentities()){
+                deleteFile(storePath);
+                storePath.mkdirs();
+                store = DIDStore.open(storePath);
                 Log.d("wangran", "bbbbbbbbbbbbb");
-                return; // Already exists
+//                return; // Already exists
             }
             Log.d("wangran", "cccccccccc");
             Mnemonic mg = Mnemonic.getInstance();
@@ -165,9 +164,13 @@ public class DIDHelper {
             File storefile = Environment.getExternalStorageDirectory();
             File storePath = new File(storefile.getAbsolutePath(), DIDHelper.childStorePath);
             DIDStore didStore = DIDStore.open(storePath);
-            currentDIDDocument = didStore.loadDid(didString);
-
-            Log.d(TAG, "loadDIDStore: ====1111====="+currentDIDDocument.getSubject());
+            if (!storePath.exists())
+                storePath.mkdirs();
+            if (didStore.containsDids()){
+                currentDIDDocument = didStore.loadDid(didString);
+                Log.d(TAG, "loadDIDStore: ====1111====="+currentDIDDocument.getSubject());
+            }
+            Log.d(TAG, "loadDIDStore: ====222=====not load diddocument");
         } catch (DIDStoreException e) {
             Log.d(TAG, "loadDIDStore: ====22222222222222222====="+e.toString());
             throw new RuntimeException(e);
