@@ -27,6 +27,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitorpamplona.amethyst.R
 import com.vitorpamplona.amethyst.model.Account
@@ -54,7 +56,15 @@ import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
     //type 0 cancel, 1 finish
     val newDIDViewModel: NewDIDViewModel = viewModel()
+    val cachedDID = MutableLiveData("")
 
+    var createFinish by remember {
+        mutableStateOf(false)
+    }
+
+    var createError by remember {
+        mutableStateOf(false)
+    }
 
     LaunchedEffect(Unit) {
     }
@@ -74,36 +84,63 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                     .padding(10.dp)
                     .height(350.dp)
                 ) {
-                    Column(modifier = Modifier.align(Alignment.End)) {
-                        Text(text = "waitting...")
+//                    Column(modifier = Modifier.align(Alignment.End)) {
+//                        CloseButton(onCancel = {
+//                            onFinish(0, "")
+//                        })
+//                    }
+
+                    val state = cachedDID.observeAsState()
+                    state.value?.let {
+                        if (it == ""){
+                            Text(text = "Creating...")
+                        }else{
+                            Text(text = "Created...")
+                        }
                     }
-                    Text(text = "waitting...")
 
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
+                                  if (createFinish){
+                                      cachedDID.value?.let { onFinish(1, it) }
+                                  }
 //                            if (newDIDViewModel.publishFinish) {
 //                                onConfirm()
 //                            }
-                            newDIDViewModel.create { didString ->
-                                run {
-                                    Log.d(TAG, "NewDIDView: did is $didString")
-                                    if (didString.isNotBlank()){
-                                        onFinish(1,didString)
-                                    }
-                                }
-                            }
+
                         },
                         shape = RoundedCornerShape(20.dp),
                         colors = ButtonDefaults
                             .buttonColors(
-//                                backgroundColor = if (newDIDViewModel.publishFinish) MaterialTheme.colors.primary else Color.Gray
-                                backgroundColor = MaterialTheme.colors.primary
+                                backgroundColor = if (createFinish) MaterialTheme.colors.primary else Color.Gray
+//                                backgroundColor = MaterialTheme.colors.primary
                             )
+
                     ) {
-                        Text(text = "Create", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+                        Text(text = "Done", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
                     }
 
+                }
+            }else if (createError){
+                Column(modifier = Modifier
+                    .padding(10.dp)
+                    .height(350.dp)
+                ) {
+                    Text(text = "Creat DID error, Please try again later")
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            onFinish(0, "")
+                        },
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults
+                            .buttonColors(
+                                backgroundColor =  MaterialTheme.colors.primary
+                            )
+                    ) {
+                        Text(text = "Done", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+                    }
                 }
             }else {
                 Column(
@@ -147,6 +184,21 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
 
                         ReadyCreateDIDButton(
                             onConfirm = {
+                                newDIDViewModel.create { type, didString ->
+                                    run {
+
+                                        Log.d(TAG, "NewDIDView: type is $type, didString is $didString")
+                                        if (type == 1){
+                                            cachedDID.postValue(didString)
+                                            Log.d(TAG, "NewDIDView: did is $didString")
+                                            createFinish = true
+                                        }else{
+                                            prepareCreate = false
+                                            createError = true
+
+                                        }
+                                    }
+                                }
                                 prepareCreate = true
                             },
                             newDIDViewModel.userName.value.isNotBlank()

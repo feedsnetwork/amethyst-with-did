@@ -1,5 +1,6 @@
 package com.vitorpamplona.amethyst.ui.actions
 
+import android.icu.lang.UCharacter.VerticalOrientation
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -56,6 +57,9 @@ import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 @Composable
 fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: Int, didString: String) -> Unit) {
     val cachedDID = MutableLiveData("")
+    var restoreFinish by remember {
+        mutableStateOf(false)
+    }
     LaunchedEffect(Unit) {
         restoreDIDViewModel.restore {
             cachedDID.postValue(it)
@@ -71,35 +75,6 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: In
     ) {
         Surface(
         ) {
-//            if (prepareRestore) {
-//                Column(modifier = Modifier
-//                    .padding(10.dp)
-//                    .height(350.dp)
-//                    .fillMaxWidth()
-//                ) {
-////                    Column(modifier = Modifier.align(Alignment.End)) {
-////                        Text(text = "waitting...")
-////                    }
-//                    Text(text = "waitting...")
-//                    Text(text = "waitting...")
-//                    Button(
-//                        modifier = Modifier.fillMaxWidth(),
-//                        onClick = {
-//
-////                            onFinish(1, cachedDID.value)
-////                            if (isFinish) {
-////                                onClose()
-////                            }
-//                        },
-//                        colors = ButtonDefaults
-//                            .buttonColors(
-//                                backgroundColor = MaterialTheme.colors.primary
-//                            )
-//                    ) {
-//                        Text(text = "Done", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
-//                    }
-//                }
-//            }else {
                 Column(
                     modifier = Modifier
                         .padding(10.dp)
@@ -113,9 +88,19 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: In
                     }
 
                     Spacer(modifier = Modifier.height(100.dp))
-
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text("wait")
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ){
+                        val state = cachedDID.observeAsState()
+                        state.value?.let {
+                            if (it == ""){
+                                Text("Restoring")
+                            }else{
+                                Text("Restore Finish")
+                                Text("DID: $it")
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(30.dp))
@@ -134,6 +119,7 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: In
                             RestoreDIDButton(
                                 onConfirm = {
                                     onFinish(1, it)
+                                    restoreFinish = true
 //                                prepareRestore = true
                                 },
                                 it.isNotBlank()
@@ -161,6 +147,6 @@ fun RestoreDIDButton(onConfirm: () -> Unit = {}, isActive: Boolean, modifier: Mo
                 backgroundColor = if (isActive) MaterialTheme.colors.primary else Color.Gray
             )
     ) {
-        Text(text = "Done", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+        Text(text = "Go", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
     }
 }

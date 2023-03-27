@@ -47,6 +47,7 @@ class AccountStateViewModel(private val localPreferences: LocalPreferences): Vie
     val account = Account(DIDPersona(pubKey = key.toByteArray()))
 
     localPreferences.saveToEncryptedStorage(account)
+
     DIDHelper.loadDIDStore(String(account.loggedIn.pubKey))
 
     login(account)
@@ -59,12 +60,12 @@ class AccountStateViewModel(private val localPreferences: LocalPreferences): Vie
   }
 
   fun login(account: Account) {
-    if (account.loggedIn.privKey != null)
+    if (account.loggedIn.privKey != null){
       _accountContent.update { AccountState.LoggedIn ( account ) }
-    else
+      DIDHelper.loadDIDStore(String(account.loggedIn.pubKey))
+    }else{
       _accountContent.update { AccountState.LoggedInViewOnly ( account ) }
-
-    DIDHelper.loadDIDStore(String(account.loggedIn.pubKey))
+    }
 
     viewModelScope.launch(Dispatchers.IO) {
       ServiceManager.start(account)

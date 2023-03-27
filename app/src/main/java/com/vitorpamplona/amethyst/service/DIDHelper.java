@@ -53,14 +53,20 @@ public class DIDHelper {
 //            File storefile = Environment.getExternalStorageDirectory();
             Log.d("wangran", "initRootIdentity: storefile0000AAA====>"+storefile);
             File storePath = new File(storefile.getAbsolutePath(), DIDHelper.childStorePath);
+//            deleteFile(storePath);
+
             storePath.mkdirs();
 
             Log.d("wangran", "initRootIdentity: storePath1111AAA====>"+storePath);
             store = DIDStore.open(storePath);
             Log.d("wangran", "aaaaaaaaaaaaaa");
-            if (store.containsRootIdentities())
+            if (store.containsRootIdentities()){
+                Log.d("wangran", "bbbbbbbbbbbbb");
                 return; // Already exists
+            }
+            Log.d("wangran", "cccccccccc");
             Mnemonic mg = Mnemonic.getInstance();
+            Log.d("wangran", "ddddddddddddd");
             String mnemonic = mg.generate();
 
             Log.d("wangran", "initRootIdentity: ====>");

@@ -18,8 +18,7 @@ class NewDIDViewModel: ViewModel() {
     val userName = mutableStateOf("")
     var publishFinish = false;
     var did = ""
-    fun create(onSuccess: (didString: String) -> Unit) {//TODO ONFINISH
-
+    fun create(onFinish: (type: Int, didString: String) -> Unit) {//TODO ONFINISH
         val scope = CoroutineScope(Job() + Dispatchers.IO)
         scope.launch {
             try {
@@ -29,9 +28,10 @@ class NewDIDViewModel: ViewModel() {
                 val didString = didDocument.subject.toString()
                 Log.d(TAG, "create: ..."+didString)
                 publishFinish = true
-                onSuccess(didString)
+                onFinish(1, didString)
             }catch (e: Exception){
                 Log.d(TAG, "create error : ..."+e.toString())
+                onFinish(-1, "")
             }
         }
     }
