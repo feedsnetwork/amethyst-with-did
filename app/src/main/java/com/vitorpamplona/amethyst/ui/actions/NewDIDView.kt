@@ -1,10 +1,15 @@
 package com.vitorpamplona.amethyst.ui.actions
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,18 +45,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitorpamplona.amethyst.R
 
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
     //type 0 cancel, 1 finish
     val newDIDViewModel: NewDIDViewModel = viewModel()
     val cachedDID = MutableLiveData("")
+    var showDIDIcon by remember { mutableStateOf(false) }
+
     var showGuide by remember { mutableStateOf(true) }
+    var creatingDID by remember { mutableStateOf(false) }
     var prepareCreate by remember { mutableStateOf(false) }
     var createFinish by remember { mutableStateOf(false) }
     var createError by remember { mutableStateOf(false) }
     var guideStep by remember { mutableStateOf(1) }
 
     LaunchedEffect(Unit) {
+        showDIDIcon = true
     }
 
     Dialog(
@@ -84,12 +94,19 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                                 Spacer(modifier = Modifier.height(120.dp))
 
                                 Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                                    Image(
-                                        painterResource(id = R.drawable.did),
-                                        contentDescription = "Create did",
-                                        contentScale = ContentScale.Inside
-                                    )
+                                    AnimatedVisibility(
+                                        visible = showDIDIcon,
+                                        enter = scaleIn(),
+                                        exit = scaleOut()
+                                    ) {
+                                        Image(
+                                            painterResource(id = R.drawable.did),
+                                            contentDescription = "Create did",
+                                            contentScale = ContentScale.Inside
+                                        )
+                                    }
                                 }
+
 
                                 Spacer(modifier = Modifier.height(20.dp))
                                 Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
@@ -117,7 +134,9 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                                     .fillMaxWidth()
                                     .padding(15.dp),
                                 shape = RoundedCornerShape(20.dp),
-                                onClick = { guideStep = 2 }) {
+                                onClick = {
+                                    guideStep = 2
+                                }) {
                                 Text(text = "下一步", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
                             }
                         }
@@ -148,7 +167,9 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                                 }
 
 
-                                Column(modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(0.8f)) {
+                                Column(modifier = Modifier
+                                    .align(Alignment.CenterHorizontally)
+                                    .fillMaxWidth(0.8f)) {
                                     Spacer(modifier = Modifier.height(20.dp))
                                     Text(
                                         text = "此应用程序使用去中心身份（DID）。" ,
@@ -207,7 +228,9 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                                         contentScale = ContentScale.Inside
                                     )
                                 }
-                                Column(modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(0.8f)) {
+                                Column(modifier = Modifier
+                                    .align(Alignment.CenterHorizontally)
+                                    .fillMaxWidth(0.8f)) {
                                     Spacer(modifier = Modifier.height(20.dp))
                                     Text(
                                         text = "将来，如果您想更好地控制或在其他支持DID的应用程序中使用此身份，可以将其导出到第三方钱包应用程序，例如Elastos Essential。" ,
@@ -227,7 +250,6 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                                 Text(text = "下一步", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
                             }
                         }
-
                 }
             }else if (prepareCreate) {
                 Column(modifier = Modifier
@@ -258,6 +280,65 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                             )
                     ) {
                         Text(text = "Start", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+                    }
+                }
+            }else if (creatingDID) {
+                Column(modifier = Modifier
+                    .padding(10.dp)
+                    .height(350.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .height(550.dp)
+                    ){
+                        Row(
+
+                        ) {
+                            Column {
+
+                            }
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            CloseDialog(
+                                modifier = Modifier.align(Alignment.End),
+                                onCancel = {
+                                    onFinish(0,"")
+                                })
+
+                            Spacer(modifier = Modifier.height(120.dp))
+
+                            Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                                Image(
+                                    painterResource(id = R.drawable.did),
+                                    contentDescription = "Create did",
+                                    contentScale = ContentScale.Inside
+                                )
+                            }
+                            Column(modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .fillMaxWidth(0.8f)) {
+                                Spacer(modifier = Modifier.height(20.dp))
+                                Text(
+                                    text = "将来，如果您想更好地控制或在其他支持DID的应用程序中使用此身份，可以将其导出到第三方钱包应用程序，例如Elastos Essential。" ,
+                                    fontSize = TextUnit(13f, TextUnitType.Sp),
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        Button(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .padding(15.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            onClick = { showGuide = false }) {
+                            Text(text = "下一步", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+                        }
                     }
                 }
             }else if (createError){
@@ -324,6 +405,8 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                                     if (type == 1){
                                         cachedDID.postValue(didString)
                                         Log.d(TAG, "NewDIDView: did is $didString")
+                                        prepareCreate = false
+                                        prepareCreate = true
                                         createFinish = true
                                     }else{
                                         prepareCreate = false
@@ -331,7 +414,7 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                                     }
                                 }
                             }
-                            prepareCreate = true
+                            creatingDID = true
                         },
                         newDIDViewModel.userName.value.isNotBlank(),
                         modifier = Modifier
