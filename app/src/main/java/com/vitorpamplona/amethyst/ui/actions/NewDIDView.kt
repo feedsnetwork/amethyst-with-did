@@ -1,6 +1,9 @@
 package com.vitorpamplona.amethyst.ui.actions
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -22,9 +26,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -32,21 +37,18 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vitorpamplona.amethyst.R
 
-@OptIn(ExperimentalComposeUiApi::class)
+
 @Composable
 fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
     //type 0 cancel, 1 finish
     val newDIDViewModel: NewDIDViewModel = viewModel()
     val cachedDID = MutableLiveData("")
-
-    var createFinish by remember {
-        mutableStateOf(false)
-    }
-
-    var createError by remember {
-        mutableStateOf(false)
-    }
+    var showGuide by remember { mutableStateOf(true) }
+    var prepareCreate by remember { mutableStateOf(false) }
+    var createFinish by remember { mutableStateOf(false) }
+    var createError by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
     }
@@ -60,8 +62,53 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
     ) {
         Surface(
         ) {
-            var prepareCreate by remember { mutableStateOf(false) }
-            if (prepareCreate) {
+            if (showGuide){
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(550.dp)
+                ){
+                    Column(
+                        modifier = Modifier
+                            .height(400.dp)
+                            .fillMaxWidth()
+                    ) {
+                        CloseDialog(
+                            modifier = Modifier.align(Alignment.End),
+                            onCancel = {
+                                onFinish(0,"")
+                            })
+
+                        Spacer(modifier = Modifier.height(120.dp))
+
+                        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                            Image(
+                                painterResource(id = R.drawable.did),
+                                contentDescription = "Create did",
+                                contentScale = ContentScale.Inside
+                            )
+                        }
+                        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                            Text("欢迎来到")
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                            Text("我的第一个身份")
+                        }
+                    }
+                    Button(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(15.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        onClick = { /*TODO*/ }) {
+                        Text(text = "下一步", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+                    }
+                }
+
+//                }
+            }else if (prepareCreate) {
                 Column(modifier = Modifier
                     .padding(10.dp)
                     .height(350.dp)
@@ -118,11 +165,11 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                         .padding(10.dp)
                         .height(350.dp)
                 ) {
-                    Column(modifier = Modifier.align(Alignment.End)) {
-                        CloseButton(onCancel = {
-                            onFinish(0,"")
-                        })
-                    }
+                    CloseDialog(
+                        modifier = Modifier.align(Alignment.End),
+                        onCancel = {
+                        onFinish(0,"")
+                    })
 
                     Spacer(modifier = Modifier.height(100.dp))
 
@@ -172,6 +219,25 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun CloseDialog(modifier: Modifier, onCancel: () -> Unit) {
+    OutlinedButton(
+        modifier = modifier,
+        onClick = {
+            onCancel()
+        },
+        colors = ButtonDefaults
+            .outlinedButtonColors(backgroundColor = Color.Transparent),
+        border = BorderStroke(0.dp, Color.Transparent)
+    ) {
+        Image(
+            painterResource(id = R.drawable.close),
+            contentDescription = "Close dialog",
+            contentScale = ContentScale.Inside,
+        )
     }
 }
 
