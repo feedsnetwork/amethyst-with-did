@@ -7,8 +7,8 @@ import com.vitorpamplona.amethyst.did.DIDPersona
 import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.model.toByteArray
 import com.vitorpamplona.amethyst.ui.actions.NewRelayListViewModel
-import java.util.Locale
 import nostr.postr.toHex
+import java.util.Locale
 
 class LocalPreferences(context: Context) {
   val encryptedPreferences = EncryptedStorage().preferences(context)
@@ -16,8 +16,7 @@ class LocalPreferences(context: Context) {
 
   fun clearEncryptedStorage() {
     encryptedPreferences.edit().apply {
-      remove("nostr_privkey")
-      remove("nostr_pubkey")
+      remove("did_string")
       remove("following_channels")
       remove("hidden_users")
       remove("relays")

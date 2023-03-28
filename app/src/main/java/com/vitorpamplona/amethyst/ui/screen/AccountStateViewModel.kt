@@ -8,15 +8,11 @@ import com.vitorpamplona.amethyst.ServiceManager
 import com.vitorpamplona.amethyst.did.DIDPersona
 import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.service.DIDHelper
-import fr.acinq.secp256k1.Hex
-import java.util.regex.Pattern
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import nostr.postr.Persona
-import nostr.postr.bechToBytes
 
 class AccountStateViewModel(private val localPreferences: LocalPreferences): ViewModel() {
   private val _accountContent = MutableStateFlow<AccountState>(AccountState.LoggedOff)
@@ -73,6 +69,7 @@ class AccountStateViewModel(private val localPreferences: LocalPreferences): Vie
   }
 
   fun logOff() {
+    Log.d("wangran", "logOff: ")
     _accountContent.update { AccountState.LoggedOff }
 
     localPreferences.clearEncryptedStorage()
