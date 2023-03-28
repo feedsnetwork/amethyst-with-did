@@ -5,7 +5,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -49,6 +49,7 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
     var prepareCreate by remember { mutableStateOf(false) }
     var createFinish by remember { mutableStateOf(false) }
     var createError by remember { mutableStateOf(false) }
+    var guideStep by remember { mutableStateOf(1) }
 
     LaunchedEffect(Unit) {
     }
@@ -63,51 +64,171 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
         Surface(
         ) {
             if (showGuide){
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .height(550.dp)
-                ){
-                    Column(
-                        modifier = Modifier
-                            .height(400.dp)
-                            .fillMaxWidth()
-                    ) {
-                        CloseDialog(
-                            modifier = Modifier.align(Alignment.End),
-                            onCancel = {
-                                onFinish(0,"")
-                            })
+                when(guideStep){
+                    1 ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .height(550.dp)
+                        ){
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                CloseDialog(
+                                    modifier = Modifier.align(Alignment.End),
+                                    onCancel = {
+                                        onFinish(0,"")
+                                    })
 
-                        Spacer(modifier = Modifier.height(120.dp))
+                                Spacer(modifier = Modifier.height(120.dp))
 
-                        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                            Image(
-                                painterResource(id = R.drawable.did),
-                                contentDescription = "Create did",
-                                contentScale = ContentScale.Inside
-                            )
+                                Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                                    Image(
+                                        painterResource(id = R.drawable.did),
+                                        contentDescription = "Create did",
+                                        contentScale = ContentScale.Inside
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(20.dp))
+                                Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                                    Text(
+                                        text = "欢迎来到" ,
+                                        fontSize = TextUnit(16f, TextUnitType.Sp),
+                                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(7.dp))
+                                Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                                    Text(
+                                        text = "我的第一个身份" ,
+                                        fontSize = TextUnit(21f, TextUnitType.Sp),
+                                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            Button(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth()
+                                    .padding(15.dp),
+                                shape = RoundedCornerShape(20.dp),
+                                onClick = { guideStep = 2 }) {
+                                Text(text = "下一步", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+                            }
                         }
-                        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                            Text("欢迎来到")
+                    2 ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .height(550.dp)
+                        ){
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                CloseDialog(
+                                    modifier = Modifier.align(Alignment.End),
+                                    onCancel = {
+                                        onFinish(0,"")
+                                    })
+
+                                Spacer(modifier = Modifier.height(120.dp))
+
+                                Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                                    Image(
+                                        painterResource(id = R.drawable.did),
+                                        contentDescription = "Create did",
+                                        contentScale = ContentScale.Inside
+                                    )
+                                }
+
+
+                                Column(modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(0.8f)) {
+                                    Spacer(modifier = Modifier.height(20.dp))
+                                    Text(
+                                        text = "此应用程序使用去中心身份（DID）。" ,
+                                        fontSize = TextUnit(13f, TextUnitType.Sp),
+                                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "使用去中心身份，您拥有自己的身份和数据。" ,
+                                        fontSize = TextUnit(13f, TextUnitType.Sp),
+                                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(20.dp))
+
+                                    Text(
+                                        text = "因此，您似乎还不知道这是什么，或者您从未创建自己的身份？ 我们在这里为您提供帮助，以下步骤将自动为您创建和发布全新的Elastos身份和存储空间。" ,
+                                        fontSize = TextUnit(13f, TextUnitType.Sp),
+                                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            Button(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth()
+                                    .padding(15.dp),
+                                shape = RoundedCornerShape(20.dp),
+                                onClick = { guideStep = 3 }) {
+                                Text(text = "下一步", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+                            }
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                            Text("我的第一个身份")
+                    3 ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .height(550.dp)
+                        ){
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                CloseDialog(
+                                    modifier = Modifier.align(Alignment.End),
+                                    onCancel = {
+                                        onFinish(0,"")
+                                    })
+
+                                Spacer(modifier = Modifier.height(120.dp))
+
+                                Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                                    Image(
+                                        painterResource(id = R.drawable.did),
+                                        contentDescription = "Create did",
+                                        contentScale = ContentScale.Inside
+                                    )
+                                }
+                                Column(modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(0.8f)) {
+                                    Spacer(modifier = Modifier.height(20.dp))
+                                    Text(
+                                        text = "将来，如果您想更好地控制或在其他支持DID的应用程序中使用此身份，可以将其导出到第三方钱包应用程序，例如Elastos Essential。" ,
+                                        fontSize = TextUnit(13f, TextUnitType.Sp),
+                                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            Button(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth()
+                                    .padding(15.dp),
+                                shape = RoundedCornerShape(20.dp),
+                                onClick = { showGuide = false }) {
+                                Text(text = "下一步", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+                            }
                         }
-                    }
-                    Button(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .padding(15.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        onClick = { /*TODO*/ }) {
-                        Text(text = "下一步", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
-                    }
+
                 }
-
-//                }
             }else if (prepareCreate) {
                 Column(modifier = Modifier
                     .padding(10.dp)
@@ -160,62 +281,64 @@ fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
                     }
                 }
             }else {
-                Column(
+
+                Box(
                     modifier = Modifier
-                        .padding(10.dp)
-                        .height(350.dp)
-                ) {
-                    CloseDialog(
-                        modifier = Modifier.align(Alignment.End),
-                        onCancel = {
-                        onFinish(0,"")
-                    })
-
-                    Spacer(modifier = Modifier.height(100.dp))
-
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(
-                            label = { Text(text = "Username") },
-                            modifier = Modifier.weight(1f),
-                            value = newDIDViewModel.userName.value,
-                            onValueChange = { newDIDViewModel.userName.value = it },
-                            placeholder = {
-                                Text(
-                                    text = "My username",
-                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
-                                )
-                            },
-                            singleLine = true
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(30.dp))
-
+                        .height(230.dp)
+                        .fillMaxWidth(0.9f)
+                ){
                     Column(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier
+                            .fillMaxWidth()
                     ) {
-                        ReadyCreateDIDButton(
-                            onConfirm = {
-                                newDIDViewModel.create { type, didString ->
-                                    run {
+                        CloseDialog(
+                            modifier = Modifier.align(Alignment.End),
+                            onCancel = {
+                                onFinish(0,"")
+                            })
 
-                                        Log.d(TAG, "NewDIDView: type is $type, didString is $didString")
-                                        if (type == 1){
-                                            cachedDID.postValue(didString)
-                                            Log.d(TAG, "NewDIDView: did is $didString")
-                                            createFinish = true
-                                        }else{
-                                            prepareCreate = false
-                                            createError = true
+//                        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                            OutlinedTextField(
+                                label = { Text(text = "Username") },
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                                value = newDIDViewModel.userName.value,
+                                onValueChange = { newDIDViewModel.userName.value = it },
+                                placeholder = {
+                                    Text(
+                                        text = "My username",
+                                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f)
+                                    )
+                                },
+                                singleLine = true
+                            )
+//                        }
 
-                                        }
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    ReadyCreateDIDButton(
+                        onConfirm = {
+                            newDIDViewModel.create { type, didString ->
+                                run {
+
+                                    Log.d(TAG, "NewDIDView: type is $type, didString is $didString")
+                                    if (type == 1){
+                                        cachedDID.postValue(didString)
+                                        Log.d(TAG, "NewDIDView: did is $didString")
+                                        createFinish = true
+                                    }else{
+                                        prepareCreate = false
+                                        createError = true
                                     }
                                 }
-                                prepareCreate = true
-                            },
-                            newDIDViewModel.userName.value.isNotBlank()
-                        )
-                    }
+                            }
+                            prepareCreate = true
+                        },
+                        newDIDViewModel.userName.value.isNotBlank(),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(15.dp),
+                    )
                 }
             }
         }
@@ -256,6 +379,6 @@ fun ReadyCreateDIDButton(onConfirm: () -> Unit = {}, isActive: Boolean, modifier
                 backgroundColor = if (isActive) MaterialTheme.colors.primary else Color.Gray
             )
     ) {
-        Text(text = "Create", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
+        Text(text = "继续", color = Color.White, fontSize = TextUnit(17f, TextUnitType.Sp))
     }
 }
