@@ -107,10 +107,11 @@ public class DIDHelper {
         Log.d("wangran", "initDid: DIDDocument"+doc);
         doc.getMetadata().setAlias("me");
         Log.d("wangran", "initDid: "+doc.getSubject().toString());
+        Log.d("wangran", "Start publish");
         doc.publish(storepass);
         DID myDid= doc.getSubject();
-        Log.d("wangran", "initDid: "+myDid);
-        System.out.println("Created the new DID : " + myDid);
+        Log.d("wangran", "Publish finish");
+        Log.d("wangran", "Created the new DID : "+myDid);
         return doc;
     }
 
