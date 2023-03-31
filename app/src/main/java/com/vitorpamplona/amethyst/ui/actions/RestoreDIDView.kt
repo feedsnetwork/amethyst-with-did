@@ -3,8 +3,11 @@ package com.vitorpamplona.amethyst.ui.actions
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -93,10 +96,10 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: In
                         .width(80.dp)
                         .height(80.dp)
                         .align(Alignment.CenterHorizontally)) {
-                        if (restoreFinish){
+
                             AnimatedVisibility(
-                                visible = true,
-                                enter = scaleIn(),
+                                visible = restoreFinish,
+                                enter = slideInVertically(tween(2000)) + fadeIn(tween(2000)) + scaleIn(tween(2000)),
                                 exit = scaleOut()
                             ) {
                                 Image(
@@ -109,7 +112,7 @@ fun RestoreDIDView(restoreDIDViewModel: RestoreDIDViewModel, onFinish: (type: In
                                     colorFilter = ColorFilter.tint(color = Color(0xFF00B000))
                                 )
                             }
-                        }else{
+                        if (!restoreFinish){
                             CircularProgressIndicator(
                                 modifier = Modifier
                                     .width(80.dp)
