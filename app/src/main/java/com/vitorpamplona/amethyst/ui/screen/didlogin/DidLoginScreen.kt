@@ -4,23 +4,24 @@ import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -29,10 +30,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -70,9 +74,6 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
     var showScanner by remember {
         mutableStateOf(false)
     }
-//    var entryMainScreen by remember {
-//        mutableStateOf(false)
-//    }
 
     var restoreDID by remember {
         mutableStateOf(false)
@@ -85,7 +86,6 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
                     accountViewModel.login(didString)
                     hideAll = true
                 }
-
                 wantNewDID = false
             }
         })
@@ -95,9 +95,7 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
     if (restoreDID)
         RestoreDIDView (restoreDIDViewModel, onFinish = {type,didString ->
             run {
-                Log.d(TAG, "DidLoginScreen: RestoreDIDView result = "+type+didString)
                 if (type == 1) {
-                    Log.d(TAG, "DidLoginScreen: bbbbbbbbbbbbbbbbb")
                     accountViewModel.login(didString)
                     hideAll = true
                 }
@@ -106,52 +104,6 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
         })
 
 
-//    if(entryMainScreen){
-//        Log.d(TAG, "DidLoginScreen0000: "+entryMainScreen)
-////        AccountScreen(accountViewModel, startingPage)
-//        Log.d(TAG, "DidLoginScreen1111: "+cachedDID.value)
-//
-////        val state = cachedDID.observeAsState()
-////        Log.d(TAG, "DidLoginScreen222222: "+state.value)
-////        state.value?.let {
-////            Log.d(TAG, "DidLoginScreen333333333: "+cachedDID.value)
-////            accountViewModel.login(it)
-////        }
-//
-//
-//        wantNewDID = false
-//        entryMainScreen = false
-//        Log.d(TAG, "DidLoginScreen4444444: "+entryMainScreen)
-//        hideAll = true
-////
-////        val accountState by accountViewModel.accountContent.collectAsState()
-////
-////        Crossfade(targetState = accountState, animationSpec = tween(durationMillis = 100),
-////            label = ""
-////        ) { state ->
-////            when (state) {
-////                is AccountState.LoggedOff -> {
-////                    entryMainScreen = false
-////                    hideAll = true
-////                    DidLoginScreen(accountViewModel, layoutInflater, intent, startingPage)
-////
-////                }
-////                is AccountState.LoggedIn -> {
-////                    entryMainScreen = false
-////                    hideAll = true
-////                    MainScreen(AccountViewModel(state.account), accountViewModel, startingPage)
-////
-////                }
-////                is AccountState.LoggedInViewOnly -> {
-////                    entryMainScreen = false
-////                    hideAll = true
-////                    MainScreen(AccountViewModel(state.account), accountViewModel, startingPage)
-////
-////                }
-////            }
-////        }
-//
-//    }
     if (showScanner){
         val barcodeLayoutView = layoutInflater.inflate(R.layout.layout, null)
         barcodeView = barcodeLayoutView.findViewById(R.id.barcode_scanner)
@@ -172,7 +124,6 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
         state.value?.let {
             ScanQRCodeBox(barcodeLayoutView, it,
                 onCloseScanner = {
-                    Log.d(TAG, "DidLoginScreen: close");
                     showScanner = false;
                     barcodeView.pause()
                 },
@@ -188,129 +139,189 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .background(color = Color(0xff161C24)),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // The first child is glued to the top.
-            // Hence we have nothing at the top, an empty box is used.
-            Box(modifier = Modifier.height(0.dp))
-
-            // The second child, this column, is centered vertically.
             Column(
                 modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .fillMaxSize()
+                    .weight(1f)
             ) {
-
-                Image(
-                    painterResource(id = R.drawable.logo),
-                    contentDescription = "App Logo",
-                    modifier = Modifier.size(200.dp),
-                    contentScale = ContentScale.Inside
-                )
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                Text(text = "Web3 社交网络")
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
-                    Button(
-                        onClick = {
-                            showScanner = true
-                        },
-                        shape = RoundedCornerShape(35.dp),
+                Box(modifier = Modifier.fillMaxSize()){
+                    Image(
+                        painterResource(id = R.drawable.logo),
+                        contentDescription = "App Logo",
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        colors = ButtonDefaults
-                            .buttonColors(
-                                backgroundColor = if (acceptedTerms.value) Color(999999) else Color.Blue
-                            )
-                    ) {
-                        Text(text = "导入Elastos DID",color = Color.White)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
-                    Button(
-                        onClick = {
-                            wantNewDID = true
-                        },
-                        shape = RoundedCornerShape(35.dp),
+                            .size(150.dp)
+                            .align(Alignment.Center),
+                        contentScale = ContentScale.Fit
+                    )
+                    Text(
+                        text = "Web3 社交网络" ,
+                        fontSize = TextUnit(22f, TextUnitType.Sp),
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        colors = ButtonDefaults
-                            .buttonColors(
-                                backgroundColor = if (acceptedTerms.value) Color(999999) else Color.Blue
-                            )
-                    ) {
-                        Text(text = "新人登录",color = Color.White)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
-                    Button(
-                        onClick = {
-//                            if (!acceptedTerms.value) {
-//                                termsAcceptanceIsRequired = "Acceptance of terms is required"
-//                            }
-//
-//                            if (key.value.text.isBlank()) {
-//                                errorMessage = "Key is required"
-//                            }
-//
-//                            if (acceptedTerms.value && key.value.text.isNotBlank()) {
-//                                try {
-//                                    accountViewModel.login(key.value.text)
-//                                } catch (e: Exception) {
-//                                    errorMessage = "Invalid key"
-//                                }
-//                            }
-
-                            Log.d(TAG, "DidLoginScreen: 了解更多")
-                        },
-                        shape = RoundedCornerShape(35.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        colors = ButtonDefaults
-                            .buttonColors(
-                                backgroundColor = if (acceptedTerms.value) Color(999999) else Color.Blue
-                            ),
-                    ) {
-                        Text(text = "了解更多",color = Color.White)
-                    }
+                            .align(Alignment.BottomCenter)
+                            .padding(0.dp, 0.dp, 0.dp, 40.dp),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                 }
             }
 
-            // The last child is glued to the bottom.
-//        ClickableText(
-//            text = AnnotatedString("Generate a new key"),
-//            modifier = Modifier
-//                .padding(20.dp)
-//                .fillMaxWidth(),
-//            onClick = {
-//                if (acceptedTerms.value) {
-//                    accountViewModel.newKey()
-//                } else {
-//                    termsAcceptanceIsRequired = "Acceptance of terms is required"
-//                }
-//            },
-//            style = TextStyle(
-//                fontSize = 14.sp,
-//                textDecoration = TextDecoration.Underline,
-//                color = MaterialTheme.colors.primary,
-//                textAlign = TextAlign.Center
-//            )
-//        )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+            ) {
+                Surface(modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color(0xff161C24)),
+                    color = Color(0xff323B45),
+                    shape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp),
+                ){
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(45.dp, 0.dp, 45.dp, 0.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1f),
+                        ) {
+                            Text(
+                                text = "登录" ,
+                                color = Color.White,
+                                fontSize = TextUnit(21f, TextUnitType.Sp),
+                                modifier = Modifier.align(Alignment.BottomCenter),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                                .weight(1f),
+                        ) {
+                            Text(
+                                text = "请选择应用登录方式",
+                                color = Color.LightGray,
+                                fontSize = TextUnit(14f, TextUnitType.Sp),
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(0.dp, 0.dp, 0.dp, 20.dp)
+                                .weight(1f),
+                        ) {
+                            TextButton(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(40))
+                                    .background(
+                                        brush = Brush.linearGradient(
+                                            colors = listOf(
+                                                Color(0xff7624FE),
+                                                Color(0xff368BFF),
+                                            )
+                                        )
+                                    ),
+                                onClick = {
+                                    showScanner = true
+                                }
+                            ) {
+                                Text(
+                                    text = "导入Elastos DID",
+                                    modifier = Modifier.padding(5.dp),
+                                    color = Color.White,
+                                    fontSize = TextUnit(14f, TextUnitType.Sp),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1f)
+                                .padding(0.dp, 0.dp, 0.dp, 20.dp)
+                        ) {
+                            TextButton(
+                                shape = RoundedCornerShape(20.dp),
+                                border = BorderStroke(2.dp,
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(
+                                            Color(0xff7624FE),
+                                            Color(0xff368BFF),
+                                        )
+                                    )
+                                ),
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxWidth(),
+
+                                onClick = {
+                                    wantNewDID = true
+                                }
+                            ){
+                                Text(
+                                    text = "新人登录",
+                                    modifier = Modifier.padding(5.dp),
+                                    color = Color.White,
+                                    fontSize = TextUnit(14f, TextUnitType.Sp),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(0.dp, 0.dp, 0.dp, 25.dp)
+                                .weight(1f),
+                        ) {
+                            TextButton(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxWidth(),
+
+                                onClick = {}
+                            ){
+                                Text(
+                                    text = "了解更多",
+                                    modifier = Modifier.padding(5.dp),
+                                    color = Color(0xFF368BFF),
+                                    fontSize = TextUnit(14f, TextUnitType.Sp),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(0.dp, 0.dp, 0.dp, 10.dp)
+                                .weight(1f),
+                        ) {
+                            Row(modifier = Modifier.align(Alignment.TopCenter)) {
+                                Text(
+                                    text = "登录表明您同意我们的",
+                                    color = Color.White,
+                                    fontSize = TextUnit(14f, TextUnitType.Sp),
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "条款、隐私政策",
+                                    color = Color(0xFFC4C4C4),
+                                    fontSize = TextUnit(14f, TextUnitType.Sp),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
