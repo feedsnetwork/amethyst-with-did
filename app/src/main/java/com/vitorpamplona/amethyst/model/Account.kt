@@ -1,12 +1,11 @@
 package com.vitorpamplona.amethyst.model
 
 import android.content.res.Resources
-import androidx.core.os.ConfigurationCompat
 import android.util.Log
+import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.LiveData
 import com.vitorpamplona.amethyst.did.DIDPersona
 import com.vitorpamplona.amethyst.service.DIDHelper
-import com.vitorpamplona.amethyst.service.relays.Constants
 import com.vitorpamplona.amethyst.service.model.ChannelCreateEvent
 import com.vitorpamplona.amethyst.service.model.ChannelMessageEvent
 import com.vitorpamplona.amethyst.service.model.ChannelMetadataEvent
@@ -14,14 +13,12 @@ import com.vitorpamplona.amethyst.service.model.ReactionEvent
 import com.vitorpamplona.amethyst.service.model.ReportEvent
 import com.vitorpamplona.amethyst.service.model.RepostEvent
 import com.vitorpamplona.amethyst.service.relays.Client
+import com.vitorpamplona.amethyst.service.relays.Constants
 import com.vitorpamplona.amethyst.service.relays.FeedType
 import com.vitorpamplona.amethyst.service.relays.Relay
 import com.vitorpamplona.amethyst.service.relays.RelayPool
 import com.vitorpamplona.amethyst.test.MyEvent
 import com.vitorpamplona.amethyst.ui.actions.NewRelayListViewModel
-import java.util.Date
-import java.util.Locale
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,6 +31,9 @@ import nostr.postr.events.Event
 import nostr.postr.events.MetadataEvent
 import nostr.postr.events.PrivateDmEvent
 import nostr.postr.toHex
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 val DefaultChannels = setOf(
@@ -239,7 +239,6 @@ class Account(
       Client.send(signedEvent)
       LocalCache.consume(signedEvent)
     }
-
   }
 
   fun sendChannelMeesage(message: String, toChannel: String, replyingTo: Note? = null, mentions: List<User>?) {

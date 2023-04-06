@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
@@ -36,6 +37,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.TextUnit
@@ -305,17 +309,55 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
                                 .weight(1f),
                         ) {
                             Row(modifier = Modifier.align(Alignment.TopCenter)) {
-                                Text(
-                                    text = "登录表明您同意我们的",
-                                    color = Color.White,
-                                    fontSize = TextUnit(14f, TextUnitType.Sp),
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "条款、隐私政策",
-                                    color = Color(0xFFC4C4C4),
-                                    fontSize = TextUnit(14f, TextUnitType.Sp),
-                                    fontWeight = FontWeight.Bold
+                                val annotatedLinkString: AnnotatedString = buildAnnotatedString {
+                                    val str = "登录表明您同意我们的 条款、隐私政策"
+                                    val startIndex = str.indexOf("条款、隐私政策")
+                                    val sep1Index = str.indexOf("、")
+                                    val endIndex = str.length
+                                    append(str)
+                                    addStyle(
+                                        style = SpanStyle(
+                                            color = Color.White,
+                                            fontSize = TextUnit(14f, TextUnitType.Sp),
+                                            fontWeight = FontWeight.Bold
+                                        ), start = 0, end = startIndex-1
+                                    )
+                                    addStyle(
+                                        style = SpanStyle(
+                                            color = Color(0xFFC4C4C4),
+                                            fontSize = TextUnit(14f, TextUnitType.Sp),
+                                            fontWeight = FontWeight.Bold
+                                        ), start = startIndex, end = endIndex
+                                    )
+
+                                    addStringAnnotation(
+                                        tag = "URL",
+                                        annotation = "https://trinity-feeds.app/disclaimer",
+                                        start = startIndex,
+                                        end = sep1Index
+                                    )
+                                    addStringAnnotation(
+                                        tag = "URL",
+                                        annotation = "https://trinity-tech.io/privacy_policy.html",
+                                        start = sep1Index,
+                                        end = endIndex
+                                    )
+                                }
+
+                                val uriHandler = LocalUriHandler.current
+
+                                ClickableText(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth(),
+                                    text = annotatedLinkString,
+                                    onClick = {
+                                        annotatedLinkString
+                                            .getStringAnnotations("URL", it, it)
+                                            .firstOrNull()?.let { stringAnnotation ->
+                                                uriHandler.openUri(stringAnnotation.item)
+                                            }
+                                    }
                                 )
                             }
                         }
