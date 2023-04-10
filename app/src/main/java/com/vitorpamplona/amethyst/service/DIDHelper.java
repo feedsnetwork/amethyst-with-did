@@ -35,6 +35,9 @@ public class DIDHelper {
         this.storePathFile = storePathFile;
     }
 
+    public static void setStorePathFile(File storePathFile){
+        DIDHelper.storePathFile = storePathFile;
+    }
     public DIDDocument createNewDid() throws DIDException {
         //init DIDBakckend
         initDIDBakckend();

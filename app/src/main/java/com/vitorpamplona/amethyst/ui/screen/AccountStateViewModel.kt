@@ -13,8 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 
-class AccountStateViewModel(private val localPreferences: LocalPreferences): ViewModel() {
+class AccountStateViewModel(private val localPreferences: LocalPreferences, private val didStorePathFile: File?): ViewModel() {
   private val _accountContent = MutableStateFlow<AccountState>(AccountState.LoggedOff)
   val accountContent = _accountContent.asStateFlow()
 
@@ -43,7 +44,7 @@ class AccountStateViewModel(private val localPreferences: LocalPreferences): Vie
     val account = Account(DIDPersona(pubKey = key.toByteArray()))
 
     localPreferences.saveToEncryptedStorage(account)
-
+    DIDHelper.setStorePathFile(didStorePathFile)
     DIDHelper.loadDIDStore(String(account.loggedIn.pubKey))
 
     login(account)
@@ -58,6 +59,7 @@ class AccountStateViewModel(private val localPreferences: LocalPreferences): Vie
   fun login(account: Account) {
     if (account.loggedIn.privKey != null){
       _accountContent.update { AccountState.LoggedIn ( account ) }
+      DIDHelper.setStorePathFile(didStorePathFile)
       DIDHelper.loadDIDStore(String(account.loggedIn.pubKey))
     }else{
       _accountContent.update { AccountState.LoggedInViewOnly ( account ) }

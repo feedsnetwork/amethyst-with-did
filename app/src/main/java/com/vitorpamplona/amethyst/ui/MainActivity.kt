@@ -70,13 +70,12 @@ class MainActivity : ComponentActivity() {
       AmethystTheme {
         // A surface container using the 'background' color from the theme
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-
-          val accountViewModel: AccountStateViewModel = viewModel {
-            AccountStateViewModel(LocalPreferences(applicationContext))
-          }
-
           Log.d("wangran", "onCreate: applicationContext.dataDir.absoluteFile "+applicationContext.getExternalFilesDir(null))
           var didStorePathFile = applicationContext.getExternalFilesDir(null)
+
+          val accountViewModel: AccountStateViewModel = viewModel {
+            AccountStateViewModel(LocalPreferences(applicationContext), didStorePathFile)
+          }
 
           if (didStorePathFile != null){
             AccountScreen(accountStateViewModel = accountViewModel, layoutInflater, intent, startingPage = startingPage, didStorePathFile)
