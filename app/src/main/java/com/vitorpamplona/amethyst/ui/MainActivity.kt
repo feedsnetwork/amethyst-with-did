@@ -1,10 +1,10 @@
 package com.vitorpamplona.amethyst.ui
 
 import android.Manifest
-import android.app.Activity
-import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,35 +13,19 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.Coil
 import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
-import coil.memory.MemoryCache
-import coil.request.CachePolicy
-import com.google.zxing.BarcodeFormat
-import com.journeyapps.barcodescanner.BarcodeCallback
-import com.journeyapps.barcodescanner.BarcodeResult
-import com.vitorpamplona.amethyst.EncryptedStorage
 import com.vitorpamplona.amethyst.LocalPreferences
 import com.vitorpamplona.amethyst.ServiceManager
-import com.vitorpamplona.amethyst.model.decodePublicKey
-import com.vitorpamplona.amethyst.model.toHexKey
 import com.vitorpamplona.amethyst.service.Nip19
 import com.vitorpamplona.amethyst.service.relays.Client
 import com.vitorpamplona.amethyst.ui.screen.AccountScreen
 import com.vitorpamplona.amethyst.ui.screen.AccountStateViewModel
-import com.vitorpamplona.amethyst.ui.screen.DidLoginScreen
 import com.vitorpamplona.amethyst.ui.theme.AmethystTheme
-import fr.acinq.secp256k1.Hex
-import nostr.postr.Persona
-import nostr.postr.bechToBytes
-import com.journeyapps.barcodescanner.DecoratedBarcodeView
-import com.journeyapps.barcodescanner.DefaultDecoderFactory
-import com.vitorpamplona.amethyst.R
 
 class MainActivity : ComponentActivity() {
   private val requestPermission =
@@ -91,8 +75,15 @@ class MainActivity : ComponentActivity() {
             AccountStateViewModel(LocalPreferences(applicationContext))
           }
 
-          AccountScreen(accountStateViewModel = accountViewModel, layoutInflater, intent, startingPage = startingPage)
-//          DidLoginScreen(accountViewModel, layoutInflater, intent, startingPage)
+          Log.d("wangran", "onCreate: applicationContext.dataDir.absoluteFile "+applicationContext.getExternalFilesDir(null))
+          var didStorePathFile = applicationContext.getExternalFilesDir(null)
+
+          if (didStorePathFile != null){
+            AccountScreen(accountStateViewModel = accountViewModel, layoutInflater, intent, startingPage = startingPage, didStorePathFile)
+          }else{
+            didStorePathFile =  Environment.getExternalStorageDirectory();
+            AccountScreen(accountStateViewModel = accountViewModel, layoutInflater, intent, startingPage = startingPage, didStorePathFile)
+          }
         }
       }
     }

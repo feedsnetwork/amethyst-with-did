@@ -46,13 +46,16 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitorpamplona.amethyst.R
+import java.io.File
 
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun NewDIDView(onFinish: (type: Int, didString: String) -> Unit) {
+fun NewDIDView(didStorePathFile: File, onFinish: (type: Int, didString: String) -> Unit) {
     //type 0 cancel, 1 finish
-    val newDIDViewModel: NewDIDViewModel = viewModel()
+    val newDIDViewModel: NewDIDViewModel = viewModel{
+        NewDIDViewModel(didStorePathFile)
+    }
     val cachedDID = MutableLiveData("")
     var publishStep1Finish by remember { mutableStateOf(false) }
     var publishStep2Finish by remember { mutableStateOf(false) }

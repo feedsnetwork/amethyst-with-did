@@ -57,10 +57,13 @@ import com.vitorpamplona.amethyst.R
 import com.vitorpamplona.amethyst.ui.actions.NewDIDView
 import com.vitorpamplona.amethyst.ui.actions.RestoreDIDView
 import com.vitorpamplona.amethyst.ui.actions.RestoreDIDViewModel
+import java.io.File
 
 @Composable
-fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: LayoutInflater, intent: Intent, startingPage: String?) {
-    val restoreDIDViewModel: RestoreDIDViewModel = viewModel()
+fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: LayoutInflater, intent: Intent, startingPage: String?, didStorePathFile: File) {
+    val restoreDIDViewModel: RestoreDIDViewModel = viewModel{
+        RestoreDIDViewModel(didStorePathFile)
+    }
     val TAG = "wangran"
     val key = remember { mutableStateOf(TextFieldValue("")) }
     var errorMessage by remember { mutableStateOf("") }
@@ -84,7 +87,7 @@ fun DidLoginScreen(accountViewModel: AccountStateViewModel, layoutInflater: Layo
     }
 
     if (wantNewDID){
-        NewDIDView(onFinish = {type, didString ->
+        NewDIDView(didStorePathFile, onFinish = {type, didString ->
             run {
                 if (type == 1) {
                     accountViewModel.login(didString)

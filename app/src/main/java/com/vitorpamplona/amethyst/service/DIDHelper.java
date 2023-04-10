@@ -27,7 +27,13 @@ public class DIDHelper {
     private static String childStorePath = "did";
     private static DIDStore store;
 
+    private static File storePathFile;
+
     private static DIDDocument currentDIDDocument;
+
+    public DIDHelper(File storePathFile){
+        this.storePathFile = storePathFile;
+    }
 
     public DIDDocument createNewDid() throws DIDException {
         //init DIDBakckend
@@ -49,9 +55,9 @@ public class DIDHelper {
 
     private void initRootIdentity(){
         try{
-            File storefile = Environment.getExternalStorageDirectory();
-            Log.d("wangran", "initRootIdentity: storefile0000AAA====>"+storefile);
-            File storePath = new File(storefile.getAbsolutePath(), DIDHelper.childStorePath);
+//            File storefile = Environment.getDataDirectory();
+            Log.d("wangran", "initRootIdentity: storefile0000AAA====>"+storePathFile);
+            File storePath = new File(storePathFile.getAbsolutePath(), DIDHelper.childStorePath);
 //            storePath.mkdirs();
             Log.d("wangran", "initRootIdentity: storePath1111AAA====>"+storePath);
             store = DIDStore.open(storePath);
@@ -120,10 +126,10 @@ public class DIDHelper {
         return restore(mnemonic, passphrase);
     }
     public String restore(String mnemonic, String passphrase) throws DIDException {
-        File storefile = Environment.getExternalStorageDirectory();
-        Log.d("wangran", "initRootIdentity: storefile1111====>"+storefile);
+//        File storefile = Environment.getDataDirectory();
+        Log.d("wangran", "initRootIdentity: storefile1111====>"+storePathFile);
         Log.d("wangran", "------------------");
-        File storePath = new File(storefile.getAbsolutePath(), DIDHelper.childStorePath);
+        File storePath = new File(storePathFile.getAbsolutePath(), DIDHelper.childStorePath);
         Log.d("wangran", "000000000000");
         deleteFile(storePath);
         Log.d("wangran", "1111111111");
@@ -162,8 +168,8 @@ public class DIDHelper {
 
     public static void loadDIDStore(String didString){
         try {
-            File storefile = Environment.getExternalStorageDirectory();
-            File storePath = new File(storefile.getAbsolutePath(), DIDHelper.childStorePath);
+//            File storefile = Environment.getDataDirectory();
+            File storePath = new File(storePathFile.getAbsolutePath(), DIDHelper.childStorePath);
             DIDStore didStore = DIDStore.open(storePath);
             if (!storePath.exists())
                 storePath.mkdirs();

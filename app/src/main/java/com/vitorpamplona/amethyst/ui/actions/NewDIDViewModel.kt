@@ -9,9 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 
 const val TAG = "wangran"
-class NewDIDViewModel: ViewModel() {
+class NewDIDViewModel(private val didStorePathFile: File) : ViewModel() {
     val userName = mutableStateOf("")
     var did = ""
     fun create(onFinish: (type: Int, didString: String) -> Unit) {
@@ -19,7 +20,7 @@ class NewDIDViewModel: ViewModel() {
         scope.launch {
             try {
                 delay(100)
-                val didHelper = DIDHelper()
+                val didHelper = DIDHelper(didStorePathFile)
                 Log.d(TAG, "create: 1111111111")
                 val didDocument = didHelper.createNewDid()
                 Log.d(TAG, "create: didDocument 22222$didDocument")
@@ -32,4 +33,5 @@ class NewDIDViewModel: ViewModel() {
             }
         }
     }
+
 }

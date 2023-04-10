@@ -9,18 +9,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
+import java.io.File
 
 @Composable
-fun AccountScreen(accountStateViewModel: AccountStateViewModel, layoutInflater: LayoutInflater, intent: Intent, startingPage: String?) {
+fun AccountScreen(accountStateViewModel: AccountStateViewModel, layoutInflater: LayoutInflater, intent: Intent, startingPage: String?, didStorePathFile:  File) {
   val accountState by accountStateViewModel.accountContent.collectAsState()
 
   Column() {
     Crossfade(targetState = accountState, animationSpec = tween(durationMillis = 100)) { state ->
       when (state) {
         is AccountState.LoggedOff -> {
-          DidLoginScreen(accountStateViewModel, layoutInflater, intent, startingPage)
+          DidLoginScreen(accountStateViewModel, layoutInflater, intent, startingPage, didStorePathFile)
           Log.d("wangran", "AccountScreen: 111111111111111")
         }
         is AccountState.LoggedIn -> {
